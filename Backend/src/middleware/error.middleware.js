@@ -15,24 +15,24 @@ const errorConverter = (err, req, res, next) => {
     error = new ApiError(statusCode, message, false);
   }
 
-  next(error);
+  next(error); // ALWAYS pass forward
 };
 
 const globalErrorHandler = (err, req, res, next) => {
-  const { statusCode, message, errorCode } = err;
+  const statusCode = err.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+  const message = err.message || httpStatus[statusCode];
 
   res.locals.errorMessage = message;
 
-  logger.error(err); // always log
+  logger.error(err);
 
   const response = {
     success: false,
     message,
-    ...(errorCode && { errorCode }),
     ...(config.env === "development" && { stack: err.stack }),
   };
 
-  res.status(statusCode).send(response);
+  res.status(statusCode).json(response);
 };
 
 const notFound = (req, res, next) => {
