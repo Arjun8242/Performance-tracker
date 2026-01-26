@@ -63,7 +63,7 @@ const workoutLogSchema = new mongoose.Schema({
 });
 
 // Composite index for efficient querying by user and date
-workoutLogSchema.index({ userId: 1, date: 1 });
+workoutLogSchema.index({ userId: 1, date: 1, workoutId: 1 }, { unique: true });
 
 const WorkoutLog = mongoose.model('WorkoutLog', workoutLogSchema);
 

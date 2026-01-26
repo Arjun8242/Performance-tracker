@@ -3,6 +3,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import healthRoute from './routes/health.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import workoutRoutes from './routes/workout.routes.js';
+import workoutLogRoutes from './routes/workoutLog.routes.js';
 import { successHandler, errorHandler } from './middleware/logger.middleware.js';
 import { errorConverter, globalErrorHandler, notFound } from './middleware/error.middleware.js';
 
@@ -28,6 +30,8 @@ app.use(errorHandler);
 
 app.use('/api', healthRoute);
 app.use('/auth', authRoutes);
+app.use('/workouts', workoutRoutes);
+app.use('/workouts', workoutLogRoutes);
 
 // send 404 error to undefined api routes
 app.use(notFound);
