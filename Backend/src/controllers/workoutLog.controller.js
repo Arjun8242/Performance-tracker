@@ -6,16 +6,13 @@ const logWorkout = async (req, res, next) => {
   try {
     const { workoutId, date, status, performedExercises, notes } = req.body;
     const userId = req.user.userId;
-    console.log("Content-Type:", req.headers["content-type"]);
-    console.log("Body:", req.body);
-
 
     if (!workoutId || !date || !status) {
       throw new ApiError(400, 'Workout ID, date, and status are required');
     }
 
     if (status === 'skipped' && performedExercises && performedExercises.length > 0) {
-        throw new ApiError(400, 'Performed exercises must be empty if status is skipped');
+      throw new ApiError(400, 'Performed exercises must be empty if status is skipped');
     }
 
     const workoutLog = await workoutLogService.logWorkout(
@@ -35,7 +32,7 @@ const logWorkout = async (req, res, next) => {
 const getWorkoutLogs = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const { from, to } = req.query;
+    const { from, to, page = 1, limit = 10 } = req.query;
 
     let fromDate = from
       ? new Date(from)
@@ -50,17 +47,29 @@ const getWorkoutLogs = async (req, res, next) => {
       throw new ApiError(400, "Invalid date format. Use YYYY-MM-DD.");
     }
 
+    // Handle edge case: from > to
+    if (fromDate > toDate) {
+      throw new ApiError(400, "From date cannot be after to date.");
+    }
+
     // 🔥 IMPORTANT: normalize date boundaries
     fromDate.setHours(0, 0, 0, 0);       // start of day
     toDate.setHours(23, 59, 59, 999);    // end of day
 
-    const logs = await workoutLogService.fetchWorkoutLogs(
+    const pageInt = parseInt(page, 10);
+    const limitInt = parseInt(limit, 10);
+    const maxLimit = 100;
+    const effectiveLimit = Math.min(limitInt, maxLimit);
+
+    const result = await workoutLogService.fetchWorkoutLogs(
       userId,
       fromDate,
-      toDate
+      toDate,
+      pageInt,
+      effectiveLimit
     );
 
-    res.status(200).json(logs);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

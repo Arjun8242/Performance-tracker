@@ -7,12 +7,33 @@ const errorConverter = (err, req, res, next) => {
   let error = err;
 
   if (!(error instanceof ApiError)) {
-    const statusCode =
-      error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
-    const message =
-      error.message || httpStatus[statusCode];
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const message = Object.values(error.errors)
+        .map((e) => e.message)
+        .join(', ');
+      error = new ApiError(httpStatus.BAD_REQUEST, message, false);
+    }
+    // Handle Mongoose duplicate key errors
+    else if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      const message = `${field} already exists`;
+      error = new ApiError(httpStatus.CONFLICT, message, false);
+    }
+    // Handle Mongoose cast errors (invalid ObjectId)
+    else if (error.name === 'CastError') {
+      const message = `Invalid ${error.path}: ${error.value}`;
+      error = new ApiError(httpStatus.BAD_REQUEST, message, false);
+    }
+    // Generic error
+    else {
+      const statusCode =
+        error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+      const message =
+        error.message || httpStatus[statusCode];
 
-    error = new ApiError(statusCode, message, false);
+      error = new ApiError(statusCode, message, false);
+    }
   }
 
   next(error); // ALWAYS pass forward
@@ -29,6 +50,7 @@ const globalErrorHandler = (err, req, res, next) => {
   const response = {
     success: false,
     message,
+    // Only include stack trace in development mode
     ...(config.env === "development" && { stack: err.stack }),
   };
 

@@ -19,6 +19,12 @@ const userSchema = new mongoose.Schema(
       enum: ["beginner", "intermediate", "advanced"],
     },
 
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+
     // Auth / identity fields
     email: {
       type: String,

@@ -18,12 +18,7 @@ import * as authService from '../services/auth.service.js';
  */
 const signup = async (req, res, next) => {
     try {
-        console.log(req.headers['content-type']);
-console.log(req.body);
-
-        const { email, password } = req.body;
-
-        const token = await authService.signup(email, password);
+        const token = await authService.signup(req.body);
 
         // Return only success status and token
         // Never return user object or any user data

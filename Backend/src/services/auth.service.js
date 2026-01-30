@@ -16,12 +16,12 @@ import { generateToken } from '../utils/token.js';
 
 /**
  * Register a new user
- * @param {string} email - User email
- * @param {string} password - Plain text password (hashed by model pre-save hook)
+ * @param {Object} userBody - User creation data
  * @returns {Promise<string>} JWT token
  * @throws {ApiError} 409 if email already exists, 400 for validation errors
  */
-const signup = async (email, password) => {
+const signup = async (userBody) => {
+    const { email, password } = userBody;
     // Validate inputs
     if (!email || !password) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Email and password are required');
@@ -46,8 +46,8 @@ const signup = async (email, password) => {
 
     // Create user (password is hashed by pre-save hook in user model)
     const user = await User.create({
+        ...userBody,
         email: email.toLowerCase(),
-        password,
     });
 
     // Generate token with minimal payload (userId only)

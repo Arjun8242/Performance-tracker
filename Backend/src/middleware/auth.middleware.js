@@ -1,12 +1,13 @@
 import httpStatus from 'http-status';
 import ApiError from '../utils/ApiError.js';
 import { verifyToken } from '../utils/token.js';
+import User from '../models/user.model.js';
 
 /**
  * Authentication Middleware
  * 
  * Extracts and verifies JWT from Authorization header
- * Attaches userId to req.user for downstream handlers
+ * Attaches fully populated req.user for downstream handlers
  */
 
 /**
@@ -30,10 +31,16 @@ const protect = async (req, res, next) => {
         // Verify token and extract payload
         const decoded = verifyToken(token);
 
-        // Attach userId to request for use in route handlers
-        req.user = {
-            userId: decoded.userId,
-        };
+        // Check if user still exists
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+        }
+
+        // Attach user to request for use in route handlers
+        req.user = user;
+        // Backward compatibility if mostly userId is used, but now we have full user
+        req.user.userId = user._id;
 
         next();
     } catch (error) {
@@ -56,4 +63,17 @@ const protect = async (req, res, next) => {
     }
 };
 
-export { protect };
+/**
+ * Restrict access to specific roles
+ * @param {...string} roles - Allowed roles
+ */
+const restrictTo = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return next(new ApiError(httpStatus.FORBIDDEN, 'You do not have permission to perform this action'));
+        }
+        next();
+    };
+};
+
+export { protect, restrictTo };

@@ -1,2 +1,7 @@
 .env
 *node_modules/
+verify_streaks.js
+qa_tester.js
+qa_report.json
+postman_collection.json
+scripts/
