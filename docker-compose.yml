@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./Backend
+    container_name: ai-fitness-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./Backend/.env
+    volumes:
+      - ./Backend:/app
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mongo:7
+    container_name: ai-fitness-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

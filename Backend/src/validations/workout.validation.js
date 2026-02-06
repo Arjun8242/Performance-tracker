@@ -64,6 +64,7 @@ const updateWorkoutPlan = {
     }),
     body: Joi.object().keys({
         name: Joi.string().trim().optional(),
+        week: Joi.number().integer().min(1).optional(),
         workouts: Joi.array().items(workoutSchema).min(1).optional().messages({
             'array.min': 'At least one workout is required if updating workouts',
         }),
