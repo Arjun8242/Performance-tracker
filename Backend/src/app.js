@@ -7,6 +7,7 @@ import workoutRoutes from './routes/workout.routes.js';
 import workoutLogRoutes from './routes/workoutLog.routes.js';
 import progressRoutes from './routes/progress.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import exerciseRoutes from './routes/exercise.routes.js';
 import { successHandler, errorHandler } from './middleware/logger.middleware.js';
 import { errorConverter, globalErrorHandler, notFound } from './middleware/error.middleware.js';
 import { generalLimiter } from './middleware/rateLimiter.middleware.js';
@@ -38,6 +39,7 @@ app.use('/workouts', workoutRoutes);
 app.use('/workouts', workoutLogRoutes); // Note: workoutLogRoutes might duplicate path if also /workouts. Check logic. 
 app.use('/progress', progressRoutes);
 app.use('/admin', adminRoutes);
+app.use('/exercises', exerciseRoutes);
 
 // send 404 error to undefined api routes
 app.use(notFound);

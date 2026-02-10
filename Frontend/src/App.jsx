@@ -5,8 +5,11 @@ import AuthPage from './pages/auth/AuthPage';
 import WorkoutPlanPage from './pages/WorkoutPlanPage';
 import WorkoutLoggingPage from './pages/WorkoutLoggingPage';
 import ProgressPage from './pages/ProgressPage';
+import WorkoutLibraryPage from './pages/WorkoutLibraryPage';
 import AuthenticatedAppLayout from './components/layout/AuthenticatedAppLayout';
-import { Dumbbell, ClipboardList, TrendingUp } from 'lucide-react';
+
+import { Dumbbell, ClipboardList, TrendingUp, Library } from 'lucide-react';
+
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('auth_token');
@@ -69,7 +72,20 @@ const Dashboard = () => {
             </p>
           </div>
         </Link>
+
+        <Link to="/workout-library" className="group">
+          <div className="bg-white border border-neutral-200 p-8 rounded-[2rem] hover:border-orange-500/50 hover:bg-orange-50/50 transition-all duration-300 h-full shadow-sm hover:shadow-md">
+            <div className="w-14 h-14 bg-orange-500/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-orange-500/10">
+              <Library className="w-7 h-7 text-orange-500" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-black">Workout Library</h3>
+            <p className="text-neutral-500 text-sm leading-relaxed font-medium">
+              Browse exercises and pick the best ones for your routine.
+            </p>
+          </div>
+        </Link>
       </div>
+
     </>
   );
 };
@@ -89,9 +105,11 @@ function App() {
         <Route element={<ProtectedRoute><AuthenticatedAppLayout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/workout-plans" element={<WorkoutPlanPage />} />
+          <Route path="/workout-library" element={<WorkoutLibraryPage />} />
           <Route path="/workout-logging" element={<WorkoutLoggingPage />} />
           <Route path="/progress" element={<ProgressPage />} />
         </Route>
+
 
         {/* Fallback to Home */}
         <Route path="*" element={<Navigate to="/" replace />} />
