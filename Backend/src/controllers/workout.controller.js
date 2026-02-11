@@ -4,10 +4,11 @@ import ApiError from "../utils/ApiError.js";
 const createWorkoutPlan = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const planDetails = req.body;
+    const { name, workouts } = req.body;
+
     const workoutPlan = await workoutService.createWorkoutPlan(
       userId,
-      planDetails
+      { name, workouts }
     );
     res.status(201).json(workoutPlan);
   } catch (error) {
@@ -28,17 +29,11 @@ const fetchActiveWorkoutPlan = async (req, res, next) => {
 const updateWorkoutPlan = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const { planId } = req.params;
-    const updateDetails = req.body;
-
-    // Do NOT allow changing userId or week - handled in service logic if needed, but explicitly exclude from controller input here
-    delete updateDetails.userId;
-    delete updateDetails.week;
+    const { name, workouts } = req.body;
 
     const updatedPlan = await workoutService.updateWorkoutPlan(
-      planId,
       userId,
-      updateDetails
+      { name, workouts}
     );
     res.status(200).json(updatedPlan);
   } catch (error) {
@@ -49,8 +44,7 @@ const updateWorkoutPlan = async (req, res, next) => {
 const deleteWorkoutPlan = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const { planId } = req.params;
-    const result = await workoutService.deleteWorkoutPlan(planId, userId);
+    const result = await workoutService.deleteWorkoutPlan(userId);
     res.status(200).json(result);
   } catch (error) {
     next(error);

@@ -1,70 +1,96 @@
 import mongoose from 'mongoose';
 
-const exerciseSchema = new mongoose.Schema({
-  exerciseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Exercise',
-    required: true,
+const exerciseSchema = new mongoose.Schema(
+  {
+    exerciseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Exercise',
+      required: true,
+    },
+    sets: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    reps: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    weight: {
+      type: Number,
+      min: 0,
+    },
   },
+  { _id: false }
+);
 
-  sets: {
-    type: Number,
-    required: true,
-    min: 1,
+const workoutSchema = new mongoose.Schema(
+  {
+    day: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    exercises: {
+      type: [exerciseSchema],
+      required: true,
+      validate: {
+        validator: function (v) {
+          return Array.isArray(v) && v.length > 0;
+        },
+        message: 'A workout must contain at least one exercise.',
+      },
+    },
   },
-  reps: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  weight: {
-    type: Number, // Planned weight, optional
-    min: 0,
-  },
-}, {
-  _id: false, // Do not create a default _id for subdocuments if not explicitly needed
-});
+  { _id: true }
+);
 
-const workoutSchema = new mongoose.Schema({
-  day: {
-    type: String,
-    required: true,
-    trim: true,
+const workoutPlanSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true, // One plan per user, period.
+      index: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    workouts: {
+      type: [workoutSchema],
+      required: true,
+      validate: {
+        validator: function (v) {
+          return Array.isArray(v) && v.length > 0;
+        },
+        message: 'A workout plan must contain at least one workout.',
+      },
+    },
   },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  exercises: [exerciseSchema], // Embedded exercises
-}, {
-  _id: true, // Allow Mongoose to create an _id for workouts to reference later if needed
-});
+  {
 
-const workoutPlanSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model
-    required: true,
-    index: true, // Index for faster lookups by user
-  },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  week: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  workouts: [workoutSchema], // Embedded workouts
-}, {
-  timestamps: true, // Mongoose adds createdAt and updatedAt timestamps
-});
-
-// Composite index for efficient querying by user and week
-workoutPlanSchema.index({ userId: 1, week: 1 }, { unique: true });
+    //deleting __v and _id from response to make it clean
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      },
+    },
+  }
+);
 
 const WorkoutPlan = mongoose.model('WorkoutPlan', workoutPlanSchema);
 

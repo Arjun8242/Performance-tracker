@@ -14,8 +14,8 @@ const router = Router();
 router.post("/plan", protect, validate(workoutValidation.createWorkoutPlan), createWorkoutPlan);
 router.get("/plan", protect, fetchActiveWorkoutPlan);
 
-router.put("/plan/:planId", protect, validate(workoutValidation.updateWorkoutPlan), updateWorkoutPlan);
-router.delete("/plan/:planId", protect, validate(workoutValidation.deleteWorkoutPlan), deleteWorkoutPlan);
+router.put("/plan", protect, validate(workoutValidation.updateWorkoutPlan), updateWorkoutPlan);
+router.delete("/plan", protect, validate(workoutValidation.deleteWorkoutPlan), deleteWorkoutPlan);
 
 
 export default router;

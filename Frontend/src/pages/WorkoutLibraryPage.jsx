@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search,
@@ -12,18 +13,21 @@ import {
     Info,
     AlertCircle,
     Loader2,
-    TrendingUp
+    TrendingUp,
+    Library
 } from 'lucide-react';
 
+
+import LibraryBadge from '../components/library/LibraryBadge';
+import ExerciseCard from '../components/library/ExerciseCard';
 
 const API_BASE_URL = 'http://localhost:3000';
 
 
-const MUSCLE_GROUPS = ['chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps', 'core'];
-const EQUIPMENTS = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'kettlebell'];
-const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
+import LibraryFilters from '../components/library/LibraryFilters';
 
 const WorkoutLibraryPage = () => {
+    const navigate = useNavigate();
     // State for exercises and pagination
     const [exercises, setExercises] = useState([]);
     const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -129,64 +133,13 @@ const WorkoutLibraryPage = () => {
             </div>
 
             {/* Filter UI */}
-            <div className="bg-white p-6 rounded-[2rem] border border-neutral-200 shadow-sm flex flex-wrap gap-4 items-end">
-                {/* Search */}
-                <div className="flex-1 min-w-[240px] space-y-2">
-                    <label className="text-sm font-bold text-neutral-400 uppercase tracking-wider ml-1">Search</label>
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 group-focus-within:text-orange-500 transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search exercises..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium"
-                        />
-                    </div>
-                </div>
+            <LibraryFilters
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+            />
 
-                {/* Muscle Group */}
-                <div className="w-full sm:w-auto min-w-[160px] space-y-2">
-                    <label className="text-sm font-bold text-neutral-400 uppercase tracking-wider ml-1">Muscle Group</label>
-                    <select
-                        name="muscleGroup"
-                        value={filters.muscleGroup}
-                        onChange={handleFilterChange}
-                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium appearance-none cursor-pointer"
-                    >
-                        <option value="">All Muscles</option>
-                        {MUSCLE_GROUPS.map(m => <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>)}
-                    </select>
-                </div>
-
-                {/* Equipment */}
-                <div className="w-full sm:w-auto min-w-[160px] space-y-2">
-                    <label className="text-sm font-bold text-neutral-400 uppercase tracking-wider ml-1">Equipment</label>
-                    <select
-                        name="equipment"
-                        value={filters.equipment}
-                        onChange={handleFilterChange}
-                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium appearance-none cursor-pointer"
-                    >
-                        <option value="">All Equipment</option>
-                        {EQUIPMENTS.map(e => <option key={e} value={e}>{e.charAt(0).toUpperCase() + e.slice(1)}</option>)}
-                    </select>
-                </div>
-
-                {/* Difficulty */}
-                <div className="w-full sm:w-auto min-w-[160px] space-y-2">
-                    <label className="text-sm font-bold text-neutral-400 uppercase tracking-wider ml-1">Difficulty</label>
-                    <select
-                        name="difficulty"
-                        value={filters.difficulty}
-                        onChange={handleFilterChange}
-                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium appearance-none cursor-pointer"
-                    >
-                        <option value="">All Levels</option>
-                        {DIFFICULTIES.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>)}
-                    </select>
-                </div>
-            </div>
 
             {/* Exercise Grid or Error/Empty State */}
             <div className="min-h-[400px] relative">
@@ -344,7 +297,10 @@ const WorkoutLibraryPage = () => {
                                 >
                                     Clear
                                 </button>
-                                <button className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-500/20 transition-all active:scale-95">
+                                <button
+                                    onClick={() => navigate('/plan-builder', { state: { selectedExercises } })}
+                                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-500/20 transition-all active:scale-95"
+                                >
                                     Continue
                                 </button>
                             </div>
@@ -353,70 +309,6 @@ const WorkoutLibraryPage = () => {
                 )}
             </AnimatePresence>
         </div>
-    );
-};
-
-const LibraryBadge = ({ count }) => (
-    <div className="px-3 py-1 bg-neutral-100 rounded-full text-neutral-400 text-xs font-black uppercase tracking-widest flex items-center gap-2 border border-neutral-200/50">
-        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
-        {count} Exercises Available
-    </div>
-);
-
-const ExerciseCard = ({ exercise, isSelected, onSelect }) => {
-    return (
-        <motion.div
-            layout
-            whileHover={{ y: -5 }}
-            className={`group relative bg-white rounded-[2rem] border-2 transition-all duration-300 overflow-hidden ${isSelected ? 'border-orange-500 shadow-xl shadow-orange-500/10' : 'border-neutral-100 hover:border-orange-500/30 shadow-sm'
-                }`}
-        >
-            {/* Visual Header */}
-            <div className={`h-32 p-6 flex items-start justify-between transition-colors ${isSelected ? 'bg-orange-50' : 'bg-neutral-50 group-hover:bg-orange-50/30'
-                }`}>
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 transition-all ${isSelected ? 'bg-orange-500 border-orange-500 scale-110' : 'bg-white border-neutral-100 group-hover:border-orange-500/20'
-                    }`}>
-                    <Dumbbell className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-neutral-400 group-hover:text-orange-500'}`} />
-                </div>
-                <button
-                    onClick={onSelect}
-                    className={`p-2 rounded-xl transition-all ${isSelected
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-white text-neutral-300 border border-neutral-100 hover:text-orange-500 hover:border-orange-500/50'
-                        }`}
-                >
-                    {isSelected ? <CheckCircle2 className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
-                </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
-                <div className="mb-4">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/5 px-2 py-0.5 rounded-md border border-orange-500/10 mb-2 inline-block">
-                        {exercise.muscleGroup}
-                    </span>
-                    <h3 className="text-lg font-bold text-black group-hover:text-orange-600 transition-colors line-clamp-1 capitalize">
-                        {exercise.name}
-                    </h3>
-                </div>
-
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-neutral-500">
-                        <Filter className="w-4 h-4 text-neutral-300" />
-                        <span className="text-xs font-semibold capitalize">{exercise.equipment}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-neutral-500">
-                        <TrendingUp className="w-4 h-4 text-neutral-300" />
-                        <span className="text-xs font-semibold capitalize">{exercise.difficulty}</span>
-                    </div>
-                </div>
-
-                <button className="w-full mt-6 py-3 px-4 bg-neutral-50 group-hover:bg-black group-hover:text-white text-neutral-400 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2">
-                    <Info className="w-4 h-4" />
-                    Details
-                </button>
-            </div>
-        </motion.div>
     );
 };
 
