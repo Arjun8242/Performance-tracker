@@ -48,7 +48,10 @@ const createWorkoutPlan = async (userId, planDetails) => {
 };
 
 const fetchActiveWorkoutPlan = async (userId) => {
-  const plan = await WorkoutPlan.findOne({ userId });
+  const plan = await WorkoutPlan.findOne({ userId }).populate({
+    path: 'workouts.exercises.exerciseId',
+    select: 'name muscle equipment difficulty'
+  });
 
   if (!plan) {
     throw new ApiError(404, "No workout plan found for this user");

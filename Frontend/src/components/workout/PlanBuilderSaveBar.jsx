@@ -6,9 +6,18 @@ const PlanBuilderSaveBar = ({
     workoutCount,
     exerciseCount,
     onSave,
+    onCancel,
     isSaving
 }) => {
     const navigate = useNavigate();
+
+    const handleCancel = () => {
+        if (onCancel) {
+            onCancel();
+        } else {
+            navigate('/workout-library');
+        }
+    };
 
     return (
         <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-neutral-200 z-50">
@@ -20,7 +29,7 @@ const PlanBuilderSaveBar = ({
                 </div>
                 <div className="flex items-center gap-4 w-full sm:w-auto">
                     <button
-                        onClick={() => navigate('/workout-library')}
+                        onClick={handleCancel}
                         className="flex-1 sm:flex-none px-8 py-4 text-neutral-500 hover:text-black font-bold transition-all"
                     >
                         Cancel

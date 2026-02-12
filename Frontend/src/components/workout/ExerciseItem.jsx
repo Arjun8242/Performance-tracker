@@ -1,18 +1,28 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Dumbbell, X } from 'lucide-react';
 
 const ExerciseItem = ({
     exercise,
     onUpdate,
-    onRemove
+    onRemove,
+    readOnly = false,
+    errors = {}
 }) => {
+    const displayName = exercise.exerciseId?.name || exercise.name || 'Exercise';
+
     return (
-        <div className="flex flex-wrap items-center gap-4 p-4 bg-neutral-50 rounded-2xl border border-neutral-100 group">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-neutral-100 shadow-sm">
+        <motion.div
+            layout
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className={`flex flex-wrap items-center gap-4 p-4 bg-neutral-50 rounded-2xl border transition-all duration-300 group ${readOnly ? 'border-neutral-100' : 'border-neutral-100 hover:border-orange-200 hover:bg-white hover:shadow-md'}`}
+        >
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-neutral-100 shadow-sm group-hover:scale-110 transition-transform">
                 <Dumbbell className="w-5 h-5 text-orange-500" />
             </div>
             <div className="flex-1 min-w-[150px]">
-                <h4 className="font-bold text-black capitalize">{exercise.name}</h4>
+                <h4 className="font-bold text-black capitalize transition-colors group-hover:text-orange-600">{displayName}</h4>
             </div>
 
             <div className="flex items-center gap-6">
@@ -22,8 +32,9 @@ const ExerciseItem = ({
                         type="number"
                         min="1"
                         value={exercise.sets}
+                        disabled={readOnly}
                         onChange={(e) => onUpdate('sets', parseInt(e.target.value) || 0)}
-                        className="w-16 bg-white border border-neutral-200 rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none"
+                        className={`w-16 bg-white border rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none transition-all ${readOnly ? 'cursor-default border-transparent bg-transparent' : errors.sets ? 'border-red-500 bg-red-50 shadow-sm shadow-red-100' : 'border-neutral-200'}`}
                     />
                 </div>
                 <div className="space-y-1">
@@ -32,8 +43,9 @@ const ExerciseItem = ({
                         type="number"
                         min="1"
                         value={exercise.reps}
+                        disabled={readOnly}
                         onChange={(e) => onUpdate('reps', parseInt(e.target.value) || 0)}
-                        className="w-16 bg-white border border-neutral-200 rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none"
+                        className={`w-16 bg-white border rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none transition-all ${readOnly ? 'cursor-default border-transparent bg-transparent' : errors.reps ? 'border-red-500 bg-red-50 shadow-sm shadow-red-100' : 'border-neutral-200'}`}
                     />
                 </div>
                 <div className="space-y-1">
@@ -42,18 +54,21 @@ const ExerciseItem = ({
                         type="number"
                         min="0"
                         value={exercise.weight}
+                        disabled={readOnly}
                         onChange={(e) => onUpdate('weight', parseFloat(e.target.value) || 0)}
-                        className="w-20 bg-white border border-neutral-200 rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none"
+                        className={`w-20 bg-white border rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none transition-all ${readOnly ? 'cursor-default border-transparent bg-transparent' : errors.weight ? 'border-red-500 bg-red-50 shadow-sm shadow-red-100' : 'border-neutral-200'}`}
                     />
                 </div>
-                <button
-                    onClick={onRemove}
-                    className="p-2 text-neutral-300 hover:text-red-500 transition-colors"
-                >
-                    <X className="w-5 h-5" />
-                </button>
+                {!readOnly && (
+                    <button
+                        onClick={onRemove}
+                        className="p-2 text-neutral-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
             </div>
-        </div>
+        </motion.div>
     );
 };
 
