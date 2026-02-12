@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
 const performedExerciseSchema = new mongoose.Schema({
-  name: {
-    type: String,
+  exerciseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Exercise',
     required: true,
-    trim: true,
   },
   sets: {
     type: Number,

@@ -34,10 +34,12 @@ const validate = (schema) => (req, res, next) => {
         .validate(object);
 
     if (error) {
-        const errorMessage = error.details
-            .map((details) => details.message)
-            .join(', ');
-        return next(new ApiError(httpStatus.BAD_REQUEST, errorMessage));
+        const errors = error.details.map((details) => ({
+            field: details.path.join('.'),
+            message: details.message
+        }));
+        const message = "Validation failed";
+        return next(new ApiError(httpStatus.BAD_REQUEST, message, errors));
     }
 
     if (value.body) Object.assign(req.body, value.body);

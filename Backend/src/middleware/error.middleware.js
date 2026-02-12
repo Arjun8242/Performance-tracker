@@ -9,21 +9,23 @@ const errorConverter = (err, req, res, next) => {
   if (!(error instanceof ApiError)) {
     // Handle Mongoose validation errors
     if (error.name === 'ValidationError') {
-      const message = Object.values(error.errors)
-        .map((e) => e.message)
-        .join(', ');
-      error = new ApiError(httpStatus.BAD_REQUEST, message, false);
+      const errors = Object.values(error.errors).map((e) => ({
+        field: e.path,
+        message: e.message
+      }));
+      const message = "Configuration or validation failed";
+      error = new ApiError(httpStatus.BAD_REQUEST, message, errors, false);
     }
     // Handle Mongoose duplicate key errors
     else if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
       const message = `${field} already exists`;
-      error = new ApiError(httpStatus.CONFLICT, message, false);
+      error = new ApiError(httpStatus.CONFLICT, message, [], false);
     }
     // Handle Mongoose cast errors (invalid ObjectId)
     else if (error.name === 'CastError') {
       const message = `Invalid ${error.path}: ${error.value}`;
-      error = new ApiError(httpStatus.BAD_REQUEST, message, false);
+      error = new ApiError(httpStatus.BAD_REQUEST, message, [], false);
     }
     // Generic error
     else {
@@ -32,7 +34,7 @@ const errorConverter = (err, req, res, next) => {
       const message =
         error.message || httpStatus[statusCode];
 
-      error = new ApiError(statusCode, message, false);
+      error = new ApiError(statusCode, message, [], false);
     }
   }
 
@@ -48,8 +50,9 @@ const globalErrorHandler = (err, req, res, next) => {
   logger.error(err);
 
   const response = {
-    success: false,
+    statusCode,
     message,
+    ...(err.errors && err.errors.length > 0 && { errors: err.errors }),
     // Only include stack trace in development mode
     ...(config.env === "development" && { stack: err.stack }),
   };

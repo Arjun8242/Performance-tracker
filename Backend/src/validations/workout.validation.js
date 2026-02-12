@@ -6,9 +6,9 @@ import { objectId } from '../middleware/validate.middleware.js';
  */
 
 const exerciseSchema = Joi.object().keys({
-    name: Joi.string().trim().required().messages({
-        'any.required': 'Exercise name is required',
-        'string.empty': 'Exercise name cannot be empty',
+    exerciseId: Joi.string().custom(objectId).required().messages({
+        'any.required': 'Exercise ID is required',
+        'any.invalid': 'Exercise ID must be a valid MongoDB ObjectId',
     }),
     sets: Joi.number().integer().min(1).required().messages({
         'any.required': 'Sets is required',
@@ -24,10 +24,21 @@ const exerciseSchema = Joi.object().keys({
 });
 
 const workoutSchema = Joi.object().keys({
-    day: Joi.string().trim().required().messages({
-        'any.required': 'Day is required',
-        'string.empty': 'Day cannot be empty',
-    }),
+    day: Joi.string()
+        .valid(
+            'monday',
+            'tuesday',
+            'wednesday',
+            'thursday',
+            'friday',
+            'saturday',
+            'sunday'
+        )
+        .required()
+        .messages({
+            'any.required': 'Day is required',
+            'any.only': 'Day must be one of: monday, tuesday, wednesday, thursday, friday, saturday, sunday',
+        }),
     name: Joi.string().trim().required().messages({
         'any.required': 'Workout name is required',
         'string.empty': 'Workout name cannot be empty',
@@ -44,10 +55,6 @@ const createWorkoutPlan = {
             'any.required': 'Plan name is required',
             'string.empty': 'Plan name cannot be empty',
         }),
-        week: Joi.number().integer().min(1).required().messages({
-            'any.required': 'Week number is required',
-            'number.min': 'Week must be at least 1',
-        }),
         workouts: Joi.array().items(workoutSchema).min(1).required().messages({
             'any.required': 'Workouts array is required',
             'array.min': 'At least one workout is required',
@@ -56,15 +63,8 @@ const createWorkoutPlan = {
 };
 
 const updateWorkoutPlan = {
-    params: Joi.object().keys({
-        planId: Joi.string().custom(objectId).required().messages({
-            'any.required': 'Plan ID is required',
-            'any.invalid': 'Plan ID must be a valid MongoDB ObjectId',
-        }),
-    }),
     body: Joi.object().keys({
         name: Joi.string().trim().optional(),
-        week: Joi.number().integer().min(1).optional(),
         workouts: Joi.array().items(workoutSchema).min(1).optional().messages({
             'array.min': 'At least one workout is required if updating workouts',
         }),
@@ -74,12 +74,7 @@ const updateWorkoutPlan = {
 };
 
 const deleteWorkoutPlan = {
-    params: Joi.object().keys({
-        planId: Joi.string().custom(objectId).required().messages({
-            'any.required': 'Plan ID is required',
-            'any.invalid': 'Plan ID must be a valid MongoDB ObjectId',
-        }),
-    }),
+    // No params or body needed for delete current active plan
 };
 
 export { createWorkoutPlan, updateWorkoutPlan, deleteWorkoutPlan };
