@@ -1,5 +1,18 @@
 import mongoose from 'mongoose';
 
+const setSchema = new mongoose.Schema({
+  reps: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+  weight: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+}, { _id: false });
+
 const performedExerciseSchema = new mongoose.Schema({
   exerciseId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -7,22 +20,17 @@ const performedExerciseSchema = new mongoose.Schema({
     required: true,
   },
   sets: {
-    type: Number,
+    type: [setSchema],
     required: true,
-    min: 1,
-  },
-  reps: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  weight: {
-    type: Number, // Actual lifted weight
-    required: true,
-    min: 0,
+    validate: {
+      validator: function (v) {
+        return Array.isArray(v) && v.length > 0;
+      },
+      message: 'At least one set is required per exercise.',
+    },
   },
 }, {
-  _id: false, // Do not create a default _id for subdocuments
+  _id: false,
 });
 
 // NOTE: WorkoutLog is append-only. Never update or delete documents.

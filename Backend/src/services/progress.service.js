@@ -58,30 +58,65 @@ const calculateStreak = async (userId) => {
         uniqueDays.add(normalizedDate);
     });
 
-    // Convert to sorted array (most recent first)
-    const sortedDays = Array.from(uniqueDays).sort((a, b) => b - a);
+    // Get user's workout plan to identify scheduled workout days
+    const workoutPlan = await WorkoutPlan.findOne({ userId }).lean();
+    const workoutDays = new Set(
+        workoutPlan?.workouts?.map(w => w.day.toLowerCase()) || []
+    );
+
+    const isScheduledDay = (timestamp) => {
+        // If no plan exists, assume every day is a workout day
+        if (workoutDays.size === 0) return true;
+        const d = new Date(timestamp);
+        const dayName = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][d.getUTCDay()];
+        return workoutDays.has(dayName);
+    };
 
     // Get today's date normalized
     const today = normalizeDate(new Date()).getTime();
-
-    // Check if the most recent workout was today or yesterday (to keep active streak)
-    const mostRecentDay = sortedDays[0];
     const oneDay = 24 * 60 * 60 * 1000;
 
-    if (mostRecentDay !== today && mostRecentDay !== (today - oneDay)) {
-        return 0;
+    // 1. Check if the streak is still alive
+    // Iterate backwards from today until we find a log or a missed scheduled workout
+    let checkDay = today;
+    let lastLogFound = null;
+
+    while (checkDay > (today - 7 * oneDay)) { // Check back up to 7 days for safety
+        if (uniqueDays.has(checkDay)) {
+            lastLogFound = checkDay;
+            break;
+        }
+        // If we skipped a scheduled day, the streak is broken (unless it's today and not over yet)
+        if (checkDay !== today && isScheduledDay(checkDay)) {
+            return 0;
+        }
+        checkDay -= oneDay;
     }
 
-    // Calculate streak by counting consecutive days
-    let streak = 0;
-    let expectedDay = mostRecentDay;
+    if (lastLogFound === null) return 0;
 
-    for (const day of sortedDays) {
-        if (day === expectedDay) {
+    // 2. Count the streak backwards from the last log
+    let streak = 0;
+    let current = lastLogFound;
+
+    // We continue the streak as long as:
+    // - The day has a log
+    // - OR the day is a rest day (not scheduled)
+    while (true) {
+        if (uniqueDays.has(current)) {
             streak++;
-            expectedDay -= 24 * 60 * 60 * 1000; // Move to previous day
-        } else {
-            break; // Gap found, streak ends
+        } else if (isScheduledDay(current)) {
+            // Hit a scheduled day with no log - streak ends
+            break;
+        }
+        // If it's a rest day and no log, we just "pass through" it
+
+        current -= oneDay;
+
+        // Loop safety: Stop if we've gone further back than any existing log
+        const minLogDate = Math.min(...uniqueDays);
+        if (streak > 1000 || current < minLogDate) {
+            break;
         }
     }
 
@@ -125,14 +160,13 @@ const getWeeklySummary = async (userId, week = null) => {
     // Default to current week if not provided
     const currentWeek = week || getISOWeek(new Date());
 
-    // Get the workout plan for this week
+    // Get the workout plan (one plan per user)
     const workoutPlan = await WorkoutPlan.findOne({
         userId,
-        week: currentWeek,
     }).lean();
 
     if (!workoutPlan) {
-        // No plan for this week
+        // No plan found
         return {
             plannedExercises: 0,
             performedExercises: 0,
@@ -140,6 +174,28 @@ const getWeeklySummary = async (userId, week = null) => {
             missedWorkouts: 0,
         };
     }
+
+    // Calculate the start and end of the specified ISO week to filter logs
+    const today = new Date();
+    const targetYear = today.getFullYear(); // Assuming current year for simplicity, logic could be more robust
+
+    // Simple way to get start of ISO week:
+    const getStartOfISOWeek = (w, y) => {
+        const simple = new Date(y, 0, 1 + (w - 1) * 7);
+        const dow = simple.getDay();
+        const ISOweekStart = simple;
+        if (dow <= 4)
+            ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+        else
+            ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+        ISOweekStart.setHours(0, 0, 0, 0);
+        return ISOweekStart;
+    };
+
+    const weekStart = getStartOfISOWeek(currentWeek, targetYear);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
 
     // Count total planned exercises
     let plannedExercises = 0;
@@ -150,10 +206,11 @@ const getWeeklySummary = async (userId, week = null) => {
         workoutIds.push(workout._id.toString());
     });
 
-    // Get all workout logs for this week's workouts
+    // Get all workout logs for this week's workouts within the DATE range
     const workoutLogs = await WorkoutLog.find({
         userId,
         workoutId: { $in: workoutIds },
+        date: { $gte: weekStart, $lte: weekEnd }
     }).lean();
 
     // Count performed exercises (only from completed logs)

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const OrbitingPill = ({ index, total, feature, onArrival, isRotating }) => {
+const OrbitingPill = ({ index, total, feature, onArrival }) => {
     const angle = (index / total) * (2 * Math.PI);
     // Radius for the center of the capsule
     const radius = Math.min(260, window.innerWidth * 0.3);

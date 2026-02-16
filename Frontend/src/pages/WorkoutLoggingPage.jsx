@@ -1,245 +1,267 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useReducer } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    History, Plus, CheckCircle2, AlertCircle, X, Loader2
+} from 'lucide-react';
+
+import WorkoutForm from '../components/workout/WorkoutForm';
+import WorkoutHistory from '../components/workout/WorkoutHistory';
+import ExerciseSearchModal from '../components/workout/ExerciseSearchModal';
 
 const API_BASE_URL = 'http://localhost:3000';
 
-const WorkoutLoggingPage = () => {
-    // Default valid template for a completed workout
-    const defaultLog = {
-        workoutId: "", // Should be captured from a workout plan
-        date: new Date().toISOString().split('T')[0],
-        status: "completed",
-        performedExercises: [
-            { name: "Bench Press", sets: 3, reps: 10, weight: 65 }
-        ],
-        notes: "Feeling strong today."
-    };
+const getLocalDateString = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
 
-    const [jsonPayload, setJsonPayload] = useState(JSON.stringify(defaultLog, null, 2));
-    const [queryParams, setQueryParams] = useState({
-        from: '',
-        to: '',
-        page: 1,
-        limit: 10
-    });
+const initialState = {
+    selectedWorkoutId: '',
+    logDate: getLocalDateString(),
+    status: 'completed',
+    performedExercises: [],
+    notes: '',
+    isSubmitting: false,
+    message: { type: '', text: '' },
+    logs: [],
+    pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
+    filters: { from: '', to: '' },
+    isLoading: false,
+    isHistoryView: false,
+    isSearchOpen: false,
+    activePlan: null
+};
 
-    const [response, setResponse] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const getAuthHeaders = () => {
-        const token = localStorage.getItem('debug_token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    };
-
-    const handleLogWorkout = async () => {
-        setIsLoading(true);
-        setResponse(null);
-        try {
-            const res = await axios.post(`${API_BASE_URL}/workouts/log`, JSON.parse(jsonPayload), {
-                headers: {
-                    ...getAuthHeaders(),
-                    'Content-Type': 'application/json'
-                }
-            });
-            setResponse({
-                method: 'POST',
-                url: '/workouts/log',
-                status: res.status,
-                statusText: res.statusText,
-                headers: res.headers,
-                data: res.data
-            });
-        } catch (err) {
-            setResponse({
-                method: 'POST',
-                url: '/workouts/log',
-                status: err.response?.status || 'NETWORK_ERROR',
-                statusText: err.response?.statusText || 'Error',
-                headers: err.response?.headers || {},
-                data: err.response?.data || { message: err.message }
-            });
-        } finally {
-            setIsLoading(false);
+function workoutReducer(state, action) {
+    switch (action.type) {
+        case 'SET_FILTERS':
+            return {
+                ...state,
+                filters: { ...state.filters, ...action.payload }
+            };
+        case 'CLEAR_FILTERS':
+            return {
+                ...state,
+                filters: { from: '', to: '' }
+            };
+        case 'SET_FIELD':
+            return { ...state, [action.field]: action.value };
+        case 'SET_MESSAGE':
+            return { ...state, message: action.payload };
+        case 'SET_SUBMITTING':
+            return { ...state, isSubmitting: action.value };
+        case 'SET_LOADING':
+            return { ...state, isLoading: action.value };
+        case 'SET_LOGS':
+            return { ...state, logs: action.payload.logs, pagination: action.payload.pagination };
+        case 'SET_ACTIVE_PLAN':
+            return { ...state, activePlan: action.payload };
+        case 'UPDATE_EXERCISE_SET': {
+            const { exIdx, setIdx, field, value } = action.payload;
+            const updated = [...state.performedExercises];
+            const updatedSets = [...updated[exIdx].sets];
+            updatedSets[setIdx] = { ...updatedSets[setIdx], [field]: value };
+            updated[exIdx] = { ...updated[exIdx], sets: updatedSets };
+            return { ...state, performedExercises: updated };
         }
-    };
+        case 'ADD_SET': {
+            const { exIdx } = action.payload;
+            const updated = [...state.performedExercises];
+            const lastSet = updated[exIdx].sets[updated[exIdx].sets.length - 1] || { reps: 1, weight: 0 };
+            updated[exIdx] = {
+                ...updated[exIdx],
+                sets: [...updated[exIdx].sets, { ...lastSet }]
+            };
+            return { ...state, performedExercises: updated };
+        }
+        case 'REMOVE_SET': {
+            const { exIdx, setIdx } = action.payload;
+            const updated = [...state.performedExercises];
+            if (updated[exIdx].sets.length > 1) {
+                updated[exIdx] = {
+                    ...updated[exIdx],
+                    sets: updated[exIdx].sets.filter((_, i) => i !== setIdx)
+                };
+            }
+            return { ...state, performedExercises: updated };
+        }
+        case 'REMOVE_EXERCISE':
+            return {
+                ...state,
+                performedExercises: state.performedExercises.filter((_, i) => i !== action.index)
+            };
+        case 'ADD_EXERCISE':
+            return {
+                ...state,
+                performedExercises: [...state.performedExercises, action.payload]
+            };
+        case 'RESET_FORM':
+            return {
+                ...state,
+                selectedWorkoutId: '',
+                status: 'completed',
+                performedExercises: [],
+                notes: '',
+                message: { type: 'success', text: 'Workout logged successfully!' }
+            };
+        default:
+            return state;
+    }
+}
 
-    const handleFetchLogs = async () => {
-        setIsLoading(true);
-        setResponse(null);
+const WorkoutLoggingPage = () => {
+    const [state, dispatch] = useReducer(workoutReducer, initialState);
 
-        // Clean empty params
-        const params = Object.fromEntries(
-            Object.entries(queryParams).filter(([_, v]) => v !== '')
-        );
+    const authHeaders = useMemo(() => {
+        const token = localStorage.getItem('auth_token');
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    }, []);
 
+    const fetchActivePlan = useCallback(async () => {
         try {
+            const res = await axios.get(`${API_BASE_URL}/workouts/plan`, { headers: authHeaders });
+            dispatch({ type: 'SET_ACTIVE_PLAN', payload: res.data });
+        } catch (err) {
+            console.error('Error fetching active plan:', err);
+        }
+    }, [authHeaders]);
+
+    const fetchLogs = useCallback(async (page = 1) => {
+        dispatch({ type: 'SET_LOADING', value: true });
+        try {
+            const params = {
+                page,
+                limit: state.pagination.limit,
+                from: state.filters.from || undefined,
+                to: state.filters.to || undefined
+            };
             const res = await axios.get(`${API_BASE_URL}/workouts/logs`, {
-                headers: getAuthHeaders(),
+                headers: authHeaders,
                 params
             });
-            setResponse({
-                method: 'GET',
-                url: '/workouts/logs',
-                status: res.status,
-                statusText: res.statusText,
-                headers: res.headers,
-                data: res.data
+            dispatch({
+                type: 'SET_LOGS',
+                payload: {
+                    logs: res.data.data,
+                    pagination: {
+                        page: res.data.page,
+                        limit: res.data.limit,
+                        total: res.data.total,
+                        totalPages: res.data.totalPages
+                    }
+                }
             });
         } catch (err) {
-            setResponse({
-                method: 'GET',
-                url: '/workouts/logs',
-                status: err.response?.status || 'NETWORK_ERROR',
-                statusText: err.response?.statusText || 'Error',
-                headers: err.response?.headers || {},
-                data: err.response?.data || { message: err.message }
-            });
+            console.error('Error fetching logs:', err);
         } finally {
-            setIsLoading(false);
+            dispatch({ type: 'SET_LOADING', value: false });
         }
-    };
+    }, [authHeaders, state.filters, state.pagination.limit]);
 
-    const autoFillWorkoutId = () => {
-        // Try to find a workout ID from previous workout plan responses if available in session? 
-        // For simplicity, we just prompt or allow manual entry in JSON.
-        // Actually, let's keep it manual in the JSON to expose the validation requirement.
+    useEffect(() => {
+        fetchActivePlan();
+        fetchLogs();
+    }, [fetchActivePlan, fetchLogs]);
+
+    const handleSelectExerciseFromSearch = (exercise) => {
+        dispatch({
+            type: 'ADD_EXERCISE',
+            payload: {
+                exerciseId: exercise.id || exercise._id,
+                name: exercise.name,
+                sets: [{ reps: 1, weight: 0 }]
+            }
+        });
+        dispatch({ type: 'SET_FIELD', field: 'isSearchOpen', value: false });
     };
 
     return (
-        <div className="diagnostic-container">
-            <header style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
-                <a href="/" style={{ color: 'var(--accent)', textDecoration: 'none' }}>← Back to Dashboard</a>
-                <h1>Workout Logging Verification</h1>
-                <p style={{ color: 'var(--text-secondary)' }}>Diagnostic probe for POST /log and GET /logs</p>
+        <div className="min-h-screen pb-12 font-['Poppins']">
+            {/* Header */}
+            <header className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h1 className="text-4xl font-black text-black tracking-tight uppercase">
+                        Workout <span className="text-orange-500">Logger</span>
+                    </h1>
+                    <p className="text-neutral-500 text-sm font-bold uppercase tracking-widest mt-2">
+                        Tracking consistency, one set at a time.
+                    </p>
+                </div>
+
+                <div className="flex items-center bg-white border border-neutral-200 p-1.5 rounded-2xl shadow-sm">
+                    <button
+                        onClick={() => dispatch({ type: 'SET_FIELD', field: 'isHistoryView', value: false })}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${!state.isHistoryView ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black'}`}
+                    >
+                        <Plus className="w-4 h-4" />
+                        Log Session
+                    </button>
+                    <button
+                        onClick={() => dispatch({ type: 'SET_FIELD', field: 'isHistoryView', value: true })}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${state.isHistoryView ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black'}`}
+                    >
+                        <History className="w-4 h-4" />
+                        View History
+                    </button>
+                </div>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                {/* Control Side */}
-                <section>
-                    <div style={{ marginBottom: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3>1. Log Entry Payload (JSON)</h3>
-                            <button onClick={() => setJsonPayload(JSON.stringify(defaultLog, null, 2))} style={{ fontSize: '0.7rem' }}>RESET TEMPLATE</button>
-                        </div>
-                        <textarea
-                            value={jsonPayload}
-                            onChange={(e) => setJsonPayload(e.target.value)}
-                            style={{
-                                width: '100%',
-                                height: '220px',
-                                background: '#000',
-                                color: 'var(--accent)',
-                                fontFamily: 'monospace',
-                                padding: '1rem',
-                                border: '1px solid var(--border)',
-                                marginTop: '0.5rem'
-                            }}
-                        />
-                        <button
-                            onClick={handleLogWorkout}
-                            disabled={isLoading}
-                            style={{
-                                width: '100%',
-                                marginTop: '1rem',
-                                background: 'var(--accent)',
-                                color: '#000',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            SUBMIT LOG (POST /log)
+            {/* Notifications */}
+            <AnimatePresence>
+                {state.message.text && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className={`fixed top-8 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold border ${state.message.type === 'success'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                            : 'bg-red-50 text-red-700 border-red-100'
+                            }`}
+                    >
+                        {state.message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                        {state.message.text}
+                        <button onClick={() => dispatch({ type: 'SET_MESSAGE', payload: { type: '', text: '' } })} className="ml-4 opacity-50 hover:opacity-100">
+                            <X className="w-4 h-4" />
                         </button>
-                    </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-                        <h3>2. History Filters (Query Params)</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>From (ISO)</label>
-                                <input
-                                    type="text"
-                                    placeholder="2024-01-01"
-                                    value={queryParams.from}
-                                    onChange={(e) => setQueryParams({ ...queryParams, from: e.target.value })}
-                                    style={{ width: '100%' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>To (ISO)</label>
-                                <input
-                                    type="text"
-                                    placeholder="2024-12-31"
-                                    value={queryParams.to}
-                                    onChange={(e) => setQueryParams({ ...queryParams, to: e.target.value })}
-                                    style={{ width: '100%' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Page</label>
-                                <input
-                                    type="number"
-                                    value={queryParams.page}
-                                    onChange={(e) => setQueryParams({ ...queryParams, page: e.target.value })}
-                                    style={{ width: '100%' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Limit (max 100)</label>
-                                <input
-                                    type="number"
-                                    value={queryParams.limit}
-                                    onChange={(e) => setQueryParams({ ...queryParams, limit: e.target.value })}
-                                    style={{ width: '100%' }}
-                                />
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleFetchLogs}
-                            disabled={isLoading}
-                            style={{ width: '100%', marginTop: '1rem' }}
-                        >
-                            FETCH HISTORY (GET /logs)
-                        </button>
-                    </div>
-                </section>
+            {/* Main Content */}
+            <main className="max-w-4xl mx-auto">
+                {state.isHistoryView ? (
+                    <WorkoutHistory
+                        logs={state.logs}
+                        pagination={state.pagination}
+                        filters={state.filters}
+                        isLoading={state.isLoading}
+                        fetchLogs={fetchLogs}
+                        onFilterChange={(payload) => dispatch({ type: 'SET_FILTERS', payload })}
+                        onClearFilters={() => dispatch({ type: 'CLEAR_FILTERS' })}
+                    />
+                ) : (
+                    <WorkoutForm
+                        state={state}
+                        dispatch={dispatch}
+                        activePlan={state.activePlan}
+                        onSuccess={() => {
+                            dispatch({ type: 'RESET_FORM' });
+                            fetchLogs();
+                        }}
+                        setIsSearchOpen={(val) => dispatch({ type: 'SET_FIELD', field: 'isSearchOpen', value: val })}
+                    />
+                )}
+            </main>
 
-                {/* Status Side */}
-                <section>
-                    <h3>Live Response Truth</h3>
-                    {!response && !isLoading && (
-                        <div style={{ padding: '2rem', border: '1px dashed var(--border)', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                            Awaiting action. Log entries or history query results will appear here verbatim.
-                        </div>
-                    )}
-
-                    {isLoading && (
-                        <div style={{ padding: '2rem', textAlign: 'center', border: '1px solid var(--accent)' }}>
-                            <span style={{ color: 'var(--accent)' }}>●</span> Querying backend state...
-                        </div>
-                    )}
-
-                    {response && (
-                        <div>
-                            <div style={{
-                                padding: '0.5rem',
-                                background: response.status >= 400 ? 'rgba(255, 75, 75, 0.2)' : 'rgba(0, 255, 65, 0.2)',
-                                borderLeft: `4px solid ${response.status >= 400 ? 'var(--error)' : 'var(--accent)'}`,
-                                marginBottom: '1rem'
-                            }}>
-                                <div><strong>{response.method}</strong> {response.url}</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{response.status} {response.statusText}</div>
-                            </div>
-
-                            <div className="raw-response">
-                                <div style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.7rem' }}>// Response Headers</div>
-                                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(response.headers, null, 2)}</pre>
-
-                                <div style={{ margin: '1rem 0 0.5rem', color: 'var(--text-secondary)', fontSize: '0.7rem' }}>// Response Body</div>
-                                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(response.data, null, 2)}</pre>
-                            </div>
-                        </div>
-                    )}
-                </section>
-            </div>
+            {/* Modal */}
+            <ExerciseSearchModal
+                isOpen={state.isSearchOpen}
+                onClose={() => dispatch({ type: 'SET_FIELD', field: 'isSearchOpen', value: false })}
+                onSelectExercise={handleSelectExerciseFromSearch}
+            />
         </div>
     );
 };
