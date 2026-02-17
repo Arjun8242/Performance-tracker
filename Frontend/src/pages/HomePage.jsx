@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     Dumbbell, Star, User, Target, Zap,
     ClipboardList, Smile, Cpu

@@ -2,28 +2,14 @@ import httpStatus from 'http-status';
 import * as progressService from '../services/progress.service.js';
 
 /**
- * Progress Controller
- * 
- * Thin controller layer - only handles HTTP request/response
- * All business logic is in progress.service.js
- */
-
-/**
  * Get current workout streak
  * GET /progress/streak
- * 
- * @returns {Object} { currentStreak: number }
  */
 const getStreak = async (req, res, next) => {
     try {
-        // Get userId from authenticated user (set by auth middleware)
         const userId = req.user.userId;
-
         const currentStreak = await progressService.calculateStreak(userId);
-
-        res.status(httpStatus.OK).json({
-            currentStreak,
-        });
+        res.status(httpStatus.OK).json({ currentStreak });
     } catch (error) {
         next(error);
     }
@@ -32,26 +18,53 @@ const getStreak = async (req, res, next) => {
 /**
  * Get weekly progress summary
  * GET /progress/summary
- * 
- * Query params:
- * - week (optional): ISO week number, defaults to current week
- * 
- * @returns {Object} { plannedExercises, performedExercises, completionPercent, missedWorkouts }
  */
 const getSummary = async (req, res, next) => {
     try {
-        // Get userId from authenticated user (set by auth middleware)
         const userId = req.user.userId;
-
-        // Get optional week parameter from query string
-        const week = req.query.week ? parseInt(req.query.week, 10) : null;
-
-        const summary = await progressService.getWeeklySummary(userId, week);
-
+        const summary = await progressService.getWeeklySummary(userId);
         res.status(httpStatus.OK).json(summary);
     } catch (error) {
         next(error);
     }
 };
 
-export { getStreak, getSummary };
+/**
+ * Get month heatmap
+ * GET /progress/month
+ */
+const getMonth = async (req, res, next) => {
+    try {
+        const userId = req.user.userId;
+        const { month, year } = req.query;
+        const heatmap = await progressService.getMonthHeatmap(
+            userId,
+            month !== undefined ? parseInt(month, 10) : undefined,
+            year !== undefined ? parseInt(year, 10) : undefined
+        );
+        res.status(httpStatus.OK).json(heatmap);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get rule-based insights
+ * GET /progress/insights
+ */
+const getInsights = async (req, res, next) => {
+    try {
+        const userId = req.user.userId;
+        const insights = await progressService.getInsights(userId);
+        res.status(httpStatus.OK).json({ insights });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export {
+    getStreak,
+    getSummary,
+    getMonth,
+    getInsights
+};

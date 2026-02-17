@@ -1,6 +1,6 @@
 import React from 'react';
-import { Flame, Trophy, Zap, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Flame, Trophy, Zap, AlertCircle } from 'lucide-react';
 
 /**
  * ProgressOverview Component
