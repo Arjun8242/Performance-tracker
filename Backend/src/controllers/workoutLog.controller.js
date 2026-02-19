@@ -52,9 +52,9 @@ const getWorkoutLogs = async (req, res, next) => {
       throw new ApiError(400, "From date cannot be after to date.");
     }
 
-    // 🔥 IMPORTANT: normalize date boundaries
-    fromDate.setHours(0, 0, 0, 0);       // start of day
-    toDate.setHours(23, 59, 59, 999);    // end of day
+    // 🔥 IMPORTANT: normalize date boundaries using UTC to match how logs are stored
+    fromDate.setUTCHours(0, 0, 0, 0);       // start of day UTC
+    toDate.setUTCHours(23, 59, 59, 999);    // end of day UTC
 
     const pageInt = parseInt(page, 10);
     const limitInt = parseInt(limit, 10);

@@ -7,6 +7,8 @@ import WorkoutLoggingPage from './pages/WorkoutLoggingPage';
 import ProgressPage from './pages/ProgressPage';
 import WorkoutLibraryPage from './pages/WorkoutLibraryPage';
 import PlanBuilderPage from './pages/PlanBuilderPage';
+import ExerciseAnalyticsPage from './pages/ExerciseAnalyticsPage';
+import ExercisesPage from './pages/ExercisesPage';
 import AuthenticatedAppLayout from './components/layout/AuthenticatedAppLayout';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -29,6 +31,8 @@ function App() {
           <Route path="/plan-builder" element={<PlanBuilderPage />} />
           <Route path="/workout-logging" element={<WorkoutLoggingPage />} />
           <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/exercise/:exerciseId" element={<ExerciseAnalyticsPage />} />
+          <Route path="/exercises" element={<ExercisesPage />} />
         </Route>
 
 

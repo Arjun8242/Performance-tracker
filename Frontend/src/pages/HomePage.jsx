@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     Dumbbell, Star, User, Target, Zap,
     ClipboardList, Smile, Cpu
@@ -42,7 +42,7 @@ const HomePage = () => {
                     whileHover={{
                         scale: 1.1,
                         backgroundColor: '#F97316',
-                        boxShadow: "0_25px_80px_rgba(0,0,0,0.25)"
+                        boxShadow: "0 25px 80px rgba(0,0,0,0.25)"
                     }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.8, ease: "backOut" }}
@@ -70,7 +70,6 @@ const HomePage = () => {
                             total={features.length}
                             feature={feature}
                             onArrival={() => index === features.length - 1 && setIsReadyToRotate(true)}
-                            isRotating={isReadyToRotate}
                         />
                     ))}
                 </motion.div>

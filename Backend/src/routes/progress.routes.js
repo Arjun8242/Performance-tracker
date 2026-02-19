@@ -8,15 +8,14 @@ const router = express.Router();
 
 /**
  * Progress Routes
- * 
  * All routes require authentication
- * 
- * GET /progress/streak   - Get current workout streak
- * GET /progress/summary  - Get weekly completion summary
  */
 
-// Protected routes (authentication required)
 router.get('/streak', protect, progressController.getStreak);
-router.get('/summary', protect, validate(progressValidation.getSummary), progressController.getSummary);
+router.get('/summary', protect, progressController.getSummary);
+router.get('/month', protect, validate(progressValidation.getMonth), progressController.getMonth);
+router.get('/insights', protect, progressController.getInsights);
+router.get('/exercises', protect, progressController.getPerformedExercises);
+router.get('/exercise/:exerciseId', protect, validate(progressValidation.getExerciseAnalytics), progressController.getExerciseAnalytics);
 
 export default router;

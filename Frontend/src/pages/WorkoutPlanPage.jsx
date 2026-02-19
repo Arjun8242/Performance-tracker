@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Dumbbell, AlertCircle, Loader2, X,
     ChevronRight, ArrowLeft, Trophy, Calendar, Zap,
@@ -17,7 +17,6 @@ import ExerciseSearchModal from '../components/workout/ExerciseSearchModal';
 const API_BASE_URL = 'http://localhost:3000';
 
 const WorkoutPlanPage = () => {
-    const navigate = useNavigate();
     const [plan, setPlan] = useState(null);
     const [originalPlan, setOriginalPlan] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -249,8 +248,10 @@ const WorkoutPlanPage = () => {
             setPlan(null);
             setOriginalPlan(null);
             setIsEditing(false);
-        } catch (err) { setError('Failed to delete plan.'); }
-        finally { setIsSaving(false); }
+        } catch (err) {
+            console.error('Delete plan error:', err);
+            setError('Failed to delete plan.');
+        } finally { setIsSaving(false); }
     };
 
     if (isLoading) {

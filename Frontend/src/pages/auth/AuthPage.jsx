@@ -52,7 +52,7 @@ const AuthPage = () => {
                 storeTokenAndGo(res.data.token);
                 return true;
             }
-        } catch (err) {
+        } catch {
             return false;
         }
         return false;

@@ -11,21 +11,44 @@ const logWorkout = async (
   performedExercises,
   notes
 ) => {
-  // Normalize date
+  // 1. Normalize and Validate Date (Strict Today/Yesterday rule)
   const logDate = new Date(date);
   logDate.setUTCHours(0, 0, 0, 0);
 
-  // Validate workout ownership (embedded workout)
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  const yesterday = new Date(today);
+  yesterday.setUTCDate(today.getUTCDate() - 1);
+
+  if (logDate.getTime() > today.getTime()) {
+    throw new ApiError(400, "Cannot log workouts for the future");
+  }
+
+  if (logDate.getTime() !== today.getTime() && logDate.getTime() !== yesterday.getTime()) {
+    throw new ApiError(400, "Strict Performance Rule: You can only log workouts for Today or Yesterday");
+  }
+
+  // 2. Fetch Plan and Check Ownership + Day Mapping
   const workoutPlan = await WorkoutPlan.findOne({
     userId,
     "workouts._id": workoutId,
   });
 
   if (!workoutPlan) {
-    throw new ApiError(404, "Workout does not belong to the user");
+    throw new ApiError(404, "Workout does not belong to your current plan");
   }
 
-  // Idempotent log
+  // Strict Day Mapping
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const logDayName = daysOfWeek[logDate.getUTCDay()];
+  const workout = workoutPlan.workouts.id(workoutId);
+
+  if (workout.day.toLowerCase() !== logDayName.toLowerCase()) {
+    throw new ApiError(400, `Strict Day Mapping: This workout is scheduled for ${workout.day}, but you are logging for ${logDayName}`);
+  }
+
+  // 3. Idempotent log (One log per workout per date)
   const existingLog = await WorkoutLog.findOne({
     userId,
     workoutId,
@@ -66,18 +89,35 @@ const fetchWorkoutLogs = async (userId, fromDate, toDate, page = 1, limit = 10) 
   // Get total count for pagination metadata
   const total = await WorkoutLog.countDocuments(query);
 
-  // Fetch paginated logs
+  // Fetch paginated logs with population for exercises
   const logs = await WorkoutLog.find(query)
-    .sort({ date: -1 }) // Most recent first
+    .populate("performedExercises.exerciseId", "name muscleGroup difficulty equipment")
+    .sort({ date: -1 })
     .skip(skip)
     .limit(limit);
 
+  // Manual population for workoutId (since it's a subdocument ID in WorkoutPlan)
+  const userPlan = await WorkoutPlan.findOne({ userId });
+  const workoutMap = userPlan ? Object.fromEntries(userPlan.workouts.map(w => [w._id.toString(), w])) : {};
+
+  const enrichedLogs = logs.map(log => {
+    const logObj = log.toObject();
+    const workoutInfo = log.workoutId ? workoutMap[log.workoutId.toString()] : null;
+    if (workoutInfo) {
+      logObj.workoutId = {
+        _id: workoutInfo._id,
+        name: workoutInfo.name,
+        day: workoutInfo.day
+      };
+    }
+    return logObj;
+  });
   return {
     page,
     limit,
     total,
     totalPages: Math.ceil(total / limit),
-    data: logs,
+    data: enrichedLogs,
   };
 };
 

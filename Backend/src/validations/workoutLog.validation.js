@@ -5,15 +5,7 @@ import { objectId } from '../middleware/validate.middleware.js';
  * Workout Log Validation Schemas
  */
 
-const performedExerciseSchema = Joi.object().keys({
-    name: Joi.string().trim().required().messages({
-        'any.required': 'Exercise name is required',
-        'string.empty': 'Exercise name cannot be empty',
-    }),
-    sets: Joi.number().integer().min(1).required().messages({
-        'any.required': 'Sets is required',
-        'number.min': 'Sets must be at least 1',
-    }),
+const setSchema = Joi.object().keys({
     reps: Joi.number().integer().min(1).required().messages({
         'any.required': 'Reps is required',
         'number.min': 'Reps must be at least 1',
@@ -21,6 +13,17 @@ const performedExerciseSchema = Joi.object().keys({
     weight: Joi.number().min(0).required().messages({
         'any.required': 'Weight is required',
         'number.min': 'Weight cannot be negative',
+    }),
+});
+
+const performedExerciseSchema = Joi.object().keys({
+    exerciseId: Joi.string().custom(objectId).required().messages({
+        'any.required': 'Exercise ID is required',
+        'any.invalid': 'Exercise ID must be a valid MongoDB ObjectId',
+    }),
+    sets: Joi.array().items(setSchema).min(1).required().messages({
+        'any.required': 'Sets are required',
+        'array.min': 'At least one set is required per exercise',
     }),
 });
 
