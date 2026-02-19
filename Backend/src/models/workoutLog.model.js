@@ -73,6 +73,9 @@ const workoutLogSchema = new mongoose.Schema({
 // Composite index for efficient querying by user and date
 workoutLogSchema.index({ userId: 1, date: 1, workoutId: 1 }, { unique: true });
 
+// Index for Exercise Analytics Layer
+workoutLogSchema.index({ userId: 1, 'performedExercises.exerciseId': 1, date: 1 });
+
 const WorkoutLog = mongoose.model('WorkoutLog', workoutLogSchema);
 
 export default WorkoutLog;

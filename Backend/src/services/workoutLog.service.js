@@ -102,7 +102,7 @@ const fetchWorkoutLogs = async (userId, fromDate, toDate, page = 1, limit = 10) 
 
   const enrichedLogs = logs.map(log => {
     const logObj = log.toObject();
-    const workoutInfo = workoutMap[log.workoutId.toString()];
+    const workoutInfo = log.workoutId ? workoutMap[log.workoutId.toString()] : null;
     if (workoutInfo) {
       logObj.workoutId = {
         _id: workoutInfo._id,
@@ -112,7 +112,6 @@ const fetchWorkoutLogs = async (userId, fromDate, toDate, page = 1, limit = 10) 
     }
     return logObj;
   });
-
   return {
     page,
     limit,

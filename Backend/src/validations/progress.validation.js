@@ -17,7 +17,19 @@ const getSummary = {
     }),
 };
 
+const getExerciseAnalytics = {
+    params: Joi.object().keys({
+        exerciseId: Joi.string().required().custom((value, helpers) => {
+            if (!value.match(/^[0-9a-fA-F]{24}$/)) {
+                return helpers.message('"exerciseId" must be a valid mongo id');
+            }
+            return value;
+        }),
+    }),
+};
+
 export {
     getSummary,
-    getMonth
+    getMonth,
+    getExerciseAnalytics
 };

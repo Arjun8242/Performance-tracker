@@ -16,9 +16,11 @@ const getExercises = async (req, res, next) => {
         if (difficulty) filter.difficulty = difficulty;
         if (category) filter.category = category;
 
+        const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
         // Partial search for name
         if (search) {
-            filter.name = { $regex: `^${search}`, $options: 'i' };
+            filter.name = { $regex: `^${escapeRegex(search)}`, $options: 'i' };
         }
 
         // Cap limit at 100

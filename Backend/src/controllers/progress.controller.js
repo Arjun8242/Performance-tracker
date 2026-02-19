@@ -62,9 +62,50 @@ const getInsights = async (req, res, next) => {
     }
 };
 
+/**
+ * Get advanced exercise analytics
+ * GET /progress/exercise/:exerciseId
+ */
+const getExerciseAnalytics = async (req, res, next) => {
+    try {
+        const userId = req.user.userId;
+        const { exerciseId } = req.params;
+        const analytics = await progressService.getExerciseAnalytics(userId, exerciseId);
+
+        if (!analytics) {
+            return res.status(httpStatus.NOT_FOUND).json({
+                message: 'Start logging this exercise to unlock analytics.'
+            });
+        }
+
+        res.status(httpStatus.OK).json(analytics);
+    } catch (error) {
+        if (error.message === 'Exercise not found') {
+            return res.status(httpStatus.NOT_FOUND).json({ message: error.message });
+        }
+        next(error);
+    }
+};
+
+/**
+ * Get all performed exercises for the user
+ * GET /progress/exercises
+ */
+const getPerformedExercises = async (req, res, next) => {
+    try {
+        const userId = req.user.userId;
+        const exercises = await progressService.getPerformedExercises(userId);
+        res.status(httpStatus.OK).json(exercises);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export {
     getStreak,
     getSummary,
     getMonth,
-    getInsights
+    getInsights,
+    getExerciseAnalytics,
+    getPerformedExercises
 };
