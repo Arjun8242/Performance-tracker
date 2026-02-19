@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
-import { TrendingUp, Trophy, Dumbbell } from 'lucide-react';
+import { TrendingUp, Trophy, Dumbbell, BarChart2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:3000';
 
 const ProgressPage = () => {
+    const navigate = useNavigate();
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -282,17 +284,31 @@ const ProgressPage = () => {
                     <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Exercise selector</p>
                     <h3 className="text-2xl font-black uppercase tracking-tight">{stats?.selectedExerciseName}</h3>
                 </div>
-                <select
-                    value={selectedExerciseKey}
-                    onChange={(e) => setSelectedExerciseKey(e.target.value)}
-                    className="w-full md:w-80 px-4 py-3 rounded-xl border border-neutral-200 bg-white text-sm font-bold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-orange-500/40"
-                >
-                    {exerciseOptions.map((exercise) => (
-                        <option key={exercise.key} value={exercise.key}>
-                            {exercise.name}
-                        </option>
-                    ))}
-                </select>
+                <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
+                    <select
+                        value={selectedExerciseKey}
+                        onChange={(e) => setSelectedExerciseKey(e.target.value)}
+                        className="w-full md:w-80 px-4 py-3 rounded-xl border border-neutral-200 bg-white text-sm font-bold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                    >
+                        {exerciseOptions.map((exercise) => (
+                            <option key={exercise.key} value={exercise.key}>
+                                {exercise.name}
+                            </option>
+                        ))}
+                    </select>
+                    {selectedExerciseKey && exerciseOptions.find(o => o.key === selectedExerciseKey)?.id && (
+                        <button
+                            onClick={() => {
+                                const opt = exerciseOptions.find(o => o.key === selectedExerciseKey);
+                                if (opt?.id) navigate(`/exercise/${opt.id}`);
+                            }}
+                            className="w-full md:w-auto px-6 py-3 bg-black text-white rounded-xl font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:bg-neutral-800 transition-all"
+                        >
+                            <BarChart2 className="w-4 h-4" />
+                            Detailed Analytics
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

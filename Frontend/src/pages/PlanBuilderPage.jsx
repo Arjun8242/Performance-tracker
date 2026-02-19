@@ -8,6 +8,7 @@ import PlanBuilderSaveBar from '../components/workout/PlanBuilderSaveBar';
 import ErrorMessage from '../components/common/ErrorMessage';
 import WorkoutDayCard from '../components/workout/WorkoutDayCard';
 import PlanBuilderEmptyState from '../components/workout/PlanBuilderEmptyState';
+import ExerciseSearchModal from '../components/workout/ExerciseSearchModal';
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -23,6 +24,10 @@ const PlanBuilderPage = () => {
 
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
+
+    // Exercise search modal state
+    const [exerciseSearchOpen, setExerciseSearchOpen] = useState(false);
+    const [exerciseSearchDayIndex, setExerciseSearchDayIndex] = useState(null);
 
     // Redirect if no exercises selected
     useEffect(() => {
@@ -84,6 +89,39 @@ const PlanBuilderPage = () => {
             newWorkouts[dayIndex].exercises = newWorkouts[dayIndex].exercises.filter((_, i) => i !== exIndex);
             return { ...prev, workouts: newWorkouts };
         });
+    };
+
+    const openExerciseSearchForDay = (dayIndex) => {
+        setExerciseSearchDayIndex(dayIndex);
+        setExerciseSearchOpen(true);
+    };
+
+    const handleAddExercise = (dayIndex, exercise) => {
+        setPlanDraft(prev => {
+            const newWorkouts = [...prev.workouts];
+            newWorkouts[dayIndex] = {
+                ...newWorkouts[dayIndex],
+                exercises: [
+                    ...newWorkouts[dayIndex].exercises,
+                    {
+                        exerciseId: exercise.id || exercise._id,
+                        name: exercise.name,
+                        sets: 3,
+                        reps: 10,
+                        weight: 0
+                    }
+                ]
+            };
+            return { ...prev, workouts: newWorkouts };
+        });
+    };
+
+    const handleSelectExercise = (exercise) => {
+        if (exerciseSearchDayIndex !== null) {
+            handleAddExercise(exerciseSearchDayIndex, exercise);
+        }
+        setExerciseSearchOpen(false);
+        setExerciseSearchDayIndex(null);
     };
 
     const validatePlan = () => {
@@ -165,6 +203,7 @@ const PlanBuilderPage = () => {
                                 onRemoveDay={() => handleRemoveDay(winx)}
                                 onUpdateExercise={(exIndex, field, value) => handleUpdateExercise(winx, exIndex, field, value)}
                                 onRemoveExercise={(exIndex) => handleRemoveExercise(winx, exIndex)}
+                                onAddExercise={() => openExerciseSearchForDay(winx)}
                             />
                         ))
                     )}
@@ -176,6 +215,15 @@ const PlanBuilderPage = () => {
                 exerciseCount={planDraft.workouts.reduce((acc, w) => acc + w.exercises.length, 0)}
                 onSave={handleSave}
                 isSaving={isSaving}
+            />
+
+            <ExerciseSearchModal
+                isOpen={exerciseSearchOpen}
+                onClose={() => {
+                    setExerciseSearchOpen(false);
+                    setExerciseSearchDayIndex(null);
+                }}
+                onSelectExercise={handleSelectExercise}
             />
         </div>
     );

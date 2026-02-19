@@ -42,7 +42,7 @@ const HomePage = () => {
                     whileHover={{
                         scale: 1.1,
                         backgroundColor: '#F97316',
-                        boxShadow: "0_25px_80px_rgba(0,0,0,0.25)"
+                        boxShadow: "0 25px 80px rgba(0,0,0,0.25)"
                     }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.8, ease: "backOut" }}

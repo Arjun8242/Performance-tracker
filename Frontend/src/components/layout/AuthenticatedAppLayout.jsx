@@ -35,7 +35,7 @@ const AuthenticatedAppLayout = () => {
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, isImplemented: true },
         { name: 'Workout Library', path: '/workout-library', icon: Library, isImplemented: true },
-        { name: 'Exercises', path: '/exercises', icon: Dumbbell, isImplemented: false },
+        { name: 'Exercises', path: '/exercises', icon: Dumbbell, isImplemented: true },
 
         { name: 'Workout Logs', path: '/workout-logging', icon: ClipboardList, isImplemented: true },
         { name: 'Progress', path: '/progress', icon: TrendingUp, isImplemented: true },

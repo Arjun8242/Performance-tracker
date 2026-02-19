@@ -248,8 +248,10 @@ const WorkoutPlanPage = () => {
             setPlan(null);
             setOriginalPlan(null);
             setIsEditing(false);
-        } catch { setError('Failed to delete plan.'); }
-        finally { setIsSaving(false); }
+        } catch (err) {
+            console.error('Delete plan error:', err);
+            setError('Failed to delete plan.');
+        } finally { setIsSaving(false); }
     };
 
     if (isLoading) {

@@ -1,21 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const OrbitingPill = ({ index, total, feature, onArrival }) => {
     const angle = (index / total) * (2 * Math.PI);
-    // Radius for the center of the capsule
-    const radius = Math.min(260, window.innerWidth * 0.3);
 
+    const [radius, setRadius] = useState(260);
+
+    useEffect(() => {
+        const updateRadius = () => {
+            setRadius(Math.min(260, window.innerWidth * 0.3));
+        };
+
+        updateRadius(); // run once on mount
+        window.addEventListener('resize', updateRadius);
+
+        return () => window.removeEventListener('resize', updateRadius);
+    }, []);
 
     const finalX = Math.cos(angle) * radius;
     const finalY = Math.sin(angle) * radius;
 
-    // Initial coordinates (slide in from outside)
     const initialX = Math.cos(angle) * 1200;
     const initialY = Math.sin(angle) * 1200;
 
-    // Rotation for radial alignment (pointing to center)
-    // We add 90 degrees because the rectangle is naturally tall
     const rotationDeg = (angle * 180) / Math.PI + 90;
 
     return (
@@ -38,8 +45,6 @@ const OrbitingPill = ({ index, total, feature, onArrival }) => {
                     flex flex-col items-center justify-center
                     shadow-[0_10px_40px_rgba(0,0,0,0.1)]">
 
-                    {/* In the screenshot, text flows along the capsule or is placed at ends */}
-                    {/* We'll use vertical layout as shown in the spoke orientation */}
                     <div className="flex flex-col items-center gap-6">
                         <feature.icon className="w-6 h-6 text-black" />
                         <span

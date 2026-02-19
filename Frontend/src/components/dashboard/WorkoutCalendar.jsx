@@ -118,12 +118,11 @@ const WorkoutCalendar = ({ logs = [], currentStreak = 0 }) => {
                                         className="flex flex-col items-center"
                                     >
                                         <Flame className="w-3 h-3 text-white fill-white" />
-                                        {currentStreak > 0 && day === new Date().getDate() && month === new Date().getMonth() && (
+                                        {currentStreak > 0 && day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear() && (
                                             <span className="text-[8px] font-black absolute -top-4 -right-2 bg-black text-white px-1 rounded-sm">
                                                 {currentStreak}
                                             </span>
-                                        )}
-                                    </motion.div>
+                                        )}                                    </motion.div>
                                 ) : isSunday ? (
                                     <Coffee className="w-3 h-3 text-neutral-300" />
                                 ) : null}

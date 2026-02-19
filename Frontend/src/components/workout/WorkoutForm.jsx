@@ -97,17 +97,21 @@ const WorkoutForm = ({
 
         dispatch({ type: 'SET_SUBMITTING', value: true });
         try {
-            const payload = {
-                workoutId: selectedWorkoutId,
-                date: logDate,
-                status,
-                performedExercises: performedExercises.map(ex => ({
-                    exerciseId: ex.exerciseId,
+            const performed = status === 'skipped'
+                ? []
+                : performedExercises.map(ex => ({
+                    exerciseId: ex.exerciseId?._id || ex.exerciseId,
                     sets: ex.sets.map(s => ({
                         reps: Number(s.reps),
                         weight: Number(s.weight)
                     }))
-                })),
+                }));
+
+            const payload = {
+                workoutId: selectedWorkoutId,
+                date: logDate,
+                status,
+                performedExercises: performed,
                 notes
             };
 

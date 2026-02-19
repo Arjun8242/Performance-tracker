@@ -26,7 +26,7 @@ const DashboardPage = () => {
     /**
      * Fetch core dashboard data
      */
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = useCallback(async () => {
         try {
             setIsLoadingProgress(true);
             setProgressError(null);
@@ -65,11 +65,11 @@ const DashboardPage = () => {
         } finally {
             setIsLoadingProgress(false);
         }
-    };
+    }, [getAuthHeaders]);
 
     useEffect(() => {
         fetchDashboardData();
-    }, [getAuthHeaders]);
+    }, [fetchDashboardData]);
 
     // Derived stats for "small outlines"
     const totalVolume = monthlyLogs.reduce((acc, log) => {

@@ -33,7 +33,7 @@ const ExerciseItem = ({
                         min="1"
                         value={exercise.sets}
                         disabled={readOnly}
-                        onChange={(e) => onUpdate('sets', parseInt(e.target.value) || 0)}
+                        onChange={(e) => onUpdate('sets', parseInt(e.target.value) || 1)}
                         className={`w-16 bg-white border rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none transition-all ${readOnly ? 'cursor-default border-transparent bg-transparent' : errors.sets ? 'border-red-500 bg-red-50 shadow-sm shadow-red-100' : 'border-neutral-200'}`}
                     />
                 </div>
@@ -44,10 +44,9 @@ const ExerciseItem = ({
                         min="1"
                         value={exercise.reps}
                         disabled={readOnly}
-                        onChange={(e) => onUpdate('reps', parseInt(e.target.value) || 0)}
+                        onChange={(e) => onUpdate('reps', parseInt(e.target.value) || 1)}
                         className={`w-16 bg-white border rounded-lg px-2 py-1 text-center font-bold focus:border-orange-500 outline-none transition-all ${readOnly ? 'cursor-default border-transparent bg-transparent' : errors.reps ? 'border-red-500 bg-red-50 shadow-sm shadow-red-100' : 'border-neutral-200'}`}
-                    />
-                </div>
+                    />                </div>
                 <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Weight (kg)</label>
                     <input

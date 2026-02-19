@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Dumbbell, CheckCircle2, Plus, Filter, TrendingUp, Info } from 'lucide-react';
+import { Dumbbell, CheckCircle2, Plus, Filter, TrendingUp, BarChart2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ExerciseCard = ({ exercise, isSelected, onSelect }) => {
+    const navigate = useNavigate();
+
     return (
         <motion.div
             layout
@@ -50,9 +53,12 @@ const ExerciseCard = ({ exercise, isSelected, onSelect }) => {
                     </div>
                 </div>
 
-                <button className="w-full mt-6 py-3 px-4 bg-neutral-50 group-hover:bg-black group-hover:text-white text-neutral-400 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2">
-                    <Info className="w-4 h-4" />
-                    Details
+                <button
+                    onClick={() => navigate(`/exercise/${exercise.id || exercise._id}`)}
+                    className="w-full mt-6 py-3 px-4 bg-neutral-50 group-hover:bg-black group-hover:text-white text-neutral-400 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                >
+                    <BarChart2 className="w-4 h-4" />
+                    View Analytics
                 </button>
             </div>
         </motion.div>
