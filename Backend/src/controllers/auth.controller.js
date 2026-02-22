@@ -1,53 +1,52 @@
 import httpStatus from 'http-status';
-import * as authService from '../services/auth.service.js';
+import authService from '../services/auth.service.js';
 
-/**
- * Auth Controller
- * 
- * Controllers are thin - they only:
- * 1. Extract data from request
- * 2. Call appropriate service
- * 3. Send response
- * 
- * NO business logic here - that belongs in services
- */
+const COOKIE_OPTS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'Strict',
+    path: '/',
+};
 
-/**
- * Handle user registration
- * POST /auth/signup
- */
-const signup = async (req, res, next) => {
+export const register = async (req, res, next) => {
     try {
-        const token = await authService.signup(req.body);
-
-        // Return only success status and token
-        // Never return user object or any user data
-        res.status(httpStatus.CREATED).json({
-            success: true,
-            token,
-        });
-    } catch (error) {
-        next(error);
+        const result = await authService.signup(req.body);
+        res.status(httpStatus.CREATED).send(result);
+    } catch (err) {
+        next(err);
     }
 };
 
-/**
- * Handle user login
- * POST /auth/login
- */
-const login = async (req, res, next) => {
+export const verify = async (req, res, next) => {
+    try {
+        const { email, otp } = req.body;
+        const result = await authService.verifyOTP(email, otp);
+        res.status(httpStatus.OK).send(result);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const resendOtp = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const result = await authService.resendOTP(email);
+        res.status(httpStatus.OK).send(result);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
+        const { user, token } = await authService.login(email, password);
 
-        const token = await authService.login(email, password);
-
-        res.status(httpStatus.OK).json({
-            success: true,
-            token,
-        });
-    } catch (error) {
-        next(error);
+        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: 15 * 60 * 1000 });
+        res.status(httpStatus.OK).send({ message: 'Logged in', user });
+    } catch (err) {
+        next(err);
     }
 };
 
-export { signup, login };
+export default { register, verify, resendOtp, login };

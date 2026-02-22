@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 import healthRoute from './routes/health.routes.js';
@@ -8,6 +9,7 @@ import workoutLogRoutes from './routes/workoutLog.routes.js';
 import progressRoutes from './routes/progress.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 import { successHandler, errorHandler } from './middleware/logger.middleware.js';
 import { errorConverter, globalErrorHandler, notFound } from './middleware/error.middleware.js';
 import { generalLimiter } from './middleware/rateLimiter.middleware.js';
@@ -26,6 +28,9 @@ app.use(express.json());
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
 
+// parse cookies
+app.use(cookieParser());
+
 // Apply rate limiting to all routes
 app.use(generalLimiter);
 
@@ -36,10 +41,11 @@ app.use(errorHandler);
 app.use('/api', healthRoute);
 app.use('/auth', authRoutes);
 app.use('/workouts', workoutRoutes);
-app.use('/workouts', workoutLogRoutes); // Note: workoutLogRoutes might duplicate path if also /workouts. Check logic. 
+app.use('/workouts', workoutLogRoutes);
 app.use('/progress', progressRoutes);
 app.use('/admin', adminRoutes);
 app.use('/exercises', exerciseRoutes);
+app.use('/ai', aiRoutes);
 
 // send 404 error to undefined api routes
 app.use(notFound);
