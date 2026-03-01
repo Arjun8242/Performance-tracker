@@ -4,7 +4,7 @@ import authService from '../services/auth.service.js';
 const COOKIE_OPTS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Strict',
+    sameSite: 'Lax', // Changed to Lax for local development/cross-port support
     path: '/',
 };
 
@@ -20,8 +20,9 @@ export const register = async (req, res, next) => {
 export const verify = async (req, res, next) => {
     try {
         const { email, otp } = req.body;
-        const result = await authService.verifyOTP(email, otp);
-        res.status(httpStatus.OK).send(result);
+        const { user, token } = await authService.verifyOTP(email, otp);
+        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 days
+        res.status(httpStatus.OK).send({ message: 'Verified and logged in', user, token });
     } catch (err) {
         next(err);
     }
@@ -42,11 +43,16 @@ export const login = async (req, res, next) => {
         const { email, password } = req.body;
         const { user, token } = await authService.login(email, password);
 
-        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: 15 * 60 * 1000 });
-        res.status(httpStatus.OK).send({ message: 'Logged in', user });
+        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 days
+        res.status(httpStatus.OK).send({ message: 'Logged in', user, token });
     } catch (err) {
         next(err);
     }
 };
 
-export default { register, verify, resendOtp, login };
+export const logout = async (req, res) => {
+    res.clearCookie('access_token', COOKIE_OPTS);
+    res.status(httpStatus.OK).send({ message: 'Logged out' });
+};
+
+export default { register, verify, resendOtp, login, logout };

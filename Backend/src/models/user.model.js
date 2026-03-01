@@ -66,8 +66,21 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-  
-    
+    avatar: {
+      type: String,
+      default: null,
+    },
+
+    theme: {
+      type: String,
+      enum: ["light", "dark"],
+      default: "light",
+    },
+
+    nutritionProfile: {
+      type: Object,
+      default: null, // { calories, protein }
+    },
   },
   {
     timestamps: true,

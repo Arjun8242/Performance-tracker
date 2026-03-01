@@ -10,6 +10,7 @@ import progressRoutes from './routes/progress.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+import userRoutes from './routes/user.routes.js';
 import { successHandler, errorHandler } from './middleware/logger.middleware.js';
 import { errorConverter, globalErrorHandler, notFound } from './middleware/error.middleware.js';
 import { generalLimiter } from './middleware/rateLimiter.middleware.js';
@@ -19,8 +20,18 @@ const app = express();
 // Set security HTTP headers
 app.use(helmet());
 
-// Enable CORS
-app.use(cors());
+// Enable CORS with credentials support
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+}));
 
 // parse json request body
 app.use(express.json());
@@ -46,6 +57,7 @@ app.use('/progress', progressRoutes);
 app.use('/admin', adminRoutes);
 app.use('/exercises', exerciseRoutes);
 app.use('/ai', aiRoutes);
+app.use('/users', userRoutes);
 
 // send 404 error to undefined api routes
 app.use(notFound);

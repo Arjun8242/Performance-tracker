@@ -367,7 +367,7 @@ const getExerciseAnalytics = async (userId, exerciseId) => {
             volumeOverTime,
             e1RMOverTime
         },
-        prHistory: prHistory.reverse().slice(0, 5),
+        prHistory: [...prHistory].reverse().slice(0, 5),
         insights: insights.slice(0, 4)
     };
 };

@@ -20,17 +20,17 @@ const PlanBuilderSaveBar = ({
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-neutral-200 z-50">
+        <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl border-t border-neutral-200 dark:border-neutral-800 z-50">
             <div className="max-w-5xl mx-auto flex items-center justify-between">
                 <div className="hidden sm:block">
                     <p className="text-neutral-500 font-medium">
-                        Plan contains <span className="text-black font-bold">{workoutCount} days</span> and <span className="text-black font-bold">{exerciseCount} total exercises</span>
+                        Plan contains <span className="text-black dark:text-white font-bold">{workoutCount} days</span> and <span className="text-black dark:text-white font-bold">{exerciseCount} total exercises</span>
                     </p>
                 </div>
                 <div className="flex items-center gap-4 w-full sm:w-auto">
                     <button
                         onClick={handleCancel}
-                        className="flex-1 sm:flex-none px-8 py-4 text-neutral-500 hover:text-black font-bold transition-all"
+                        className="flex-1 sm:flex-none px-8 py-4 text-neutral-500 hover:text-black dark:hover:text-white font-bold transition-all"
                     >
                         Cancel
                     </button>

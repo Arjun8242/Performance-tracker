@@ -13,11 +13,6 @@ const ProgressPage = () => {
     const [timeRange, setTimeRange] = useState(30); // days
     const [selectedExerciseKey, setSelectedExerciseKey] = useState('');
 
-    const getAuthHeaders = useCallback(() => {
-        const token = localStorage.getItem('auth_token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }, []);
-
     const fetchLogs = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -39,7 +34,6 @@ const ProgressPage = () => {
 
             while (page <= totalPages) {
                 const res = await axios.get(`${API_BASE_URL}/workouts/logs`, {
-                    headers: getAuthHeaders(),
                     params: { from, to, page, limit: 100 }
                 });
 
@@ -56,7 +50,7 @@ const ProgressPage = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [getAuthHeaders, timeRange]);
+    }, [timeRange]);
 
     useEffect(() => {
         fetchLogs();
@@ -258,7 +252,7 @@ const ProgressPage = () => {
         <div className="max-w-6xl mx-auto space-y-12 pb-24 font-['Poppins']">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-5xl font-black text-black tracking-tighter uppercase leading-none">
+                    <h1 className="text-5xl font-black text-black dark:text-white tracking-tighter uppercase leading-none">
                         Strength <span className="text-orange-500">Progression</span>
                     </h1>
                     <p className="text-neutral-400 text-sm font-bold uppercase tracking-[0.2em] mt-3">
@@ -266,12 +260,12 @@ const ProgressPage = () => {
                     </p>
                 </div>
 
-                <div className="flex items-center bg-white border border-neutral-200 p-1.5 rounded-2xl shadow-sm">
+                <div className="flex items-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-1.5 rounded-2xl shadow-sm">
                     {[30, 60, 90].map((days) => (
                         <button
                             key={days}
                             onClick={() => setTimeRange(days)}
-                            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${timeRange === days ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black'}`}
+                            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${timeRange === days ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black dark:hover:text-white'}`}
                         >
                             {days}D
                         </button>
@@ -358,7 +352,7 @@ const ProgressPage = () => {
                                 <div key={`${item.isoDate}-${i}`} className="flex-1 flex flex-col items-center gap-2 group">
                                     <div className="relative w-full h-40 flex items-end">
                                         <div
-                                            className="w-full min-h-[2px] bg-neutral-400 rounded-t-xl group-hover:bg-orange-500 transition-colors duration-500"
+                                            className="w-full min-h-0.5 bg-neutral-400 rounded-t-xl group-hover:bg-orange-500 transition-colors duration-500"
                                             style={{ height: `${height}%` }}
                                         />
                                         <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
@@ -430,7 +424,7 @@ const ProgressPage = () => {
                                 </div>
                                 <h5 className="text-xs font-black uppercase tracking-tight mb-1 truncate">{item.name}</h5>
                                 <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                                    <span className="text-black font-black text-lg">{item.sessions}</span> Sessions
+                                    <span className="text-black dark:text-white font-black text-lg">{item.sessions}</span> Sessions
                                 </p>
                             </div>
                         ))}

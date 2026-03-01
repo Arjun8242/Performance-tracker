@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import { generateToken } from '../utils/token.js';
 import { sendOtpEmail } from './emailService.js';
+import logger from '../utils/logger.js';
 
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -45,7 +46,7 @@ const signup = async (userBody) => {
 
     // Send email async
     sendOtpEmail({ to: user.email, otp: rawOtp }).catch((e) =>
-        console.error(`OTP email failed for ${user.email}:`, e.message)
+        logger.error(`OTP email failed for user ${user._id}:`, { error: e.message, stack: e.stack })
     );
 
     return { message: 'OTP sent to email' };
@@ -82,7 +83,16 @@ const verifyOTP = async (email, otp) => {
     user.otpExpires = null;
     await user.save();
 
-    return { message: 'Email verified successfully' };
+    const userWithoutOtp = user.toObject();
+    delete userWithoutOtp.otpHash;
+    delete userWithoutOtp.otpExpires;
+
+    const token = generateToken(user._id.toString());
+    return {
+        message: 'Email verified successfully',
+        user: userWithoutOtp,
+        token
+    };
 };
 
 /**
@@ -109,7 +119,7 @@ const resendOTP = async (email) => {
     await user.save();
 
     sendOtpEmail({ to: user.email, otp: rawOtp }).catch((e) =>
-        console.error(`Resend OTP email failed for ${user.email}:`, e.message)
+        logger.error(`Resend OTP email failed for user ${user._id}:`, { error: e.message, stack: e.stack })
     );
 
     return { message: 'New OTP sent to email' };
@@ -137,8 +147,11 @@ const login = async (email, password) => {
         throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
     }
 
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
+
     const token = generateToken(user._id.toString());
-    return { user, token };
+    return { user: userWithoutPassword, token };
 };
 
 export default {

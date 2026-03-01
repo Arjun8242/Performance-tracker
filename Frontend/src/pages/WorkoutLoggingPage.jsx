@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback, useReducer } from 'react';
+import React, { useEffect, useCallback, useReducer } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -115,19 +115,14 @@ function workoutReducer(state, action) {
 const WorkoutLoggingPage = () => {
     const [state, dispatch] = useReducer(workoutReducer, initialState);
 
-    const authHeaders = useMemo(() => {
-        const token = localStorage.getItem('auth_token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }, []);
-
     const fetchActivePlan = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/workouts/plan`, { headers: authHeaders });
+            const res = await axios.get(`${API_BASE_URL}/workouts/plan`);
             dispatch({ type: 'SET_ACTIVE_PLAN', payload: res.data });
         } catch (err) {
             console.error('Error fetching active plan:', err);
         }
-    }, [authHeaders]);
+    }, []);
 
     const fetchLogs = useCallback(async (page = 1) => {
         dispatch({ type: 'SET_LOADING', value: true });
@@ -139,7 +134,6 @@ const WorkoutLoggingPage = () => {
                 to: state.filters.to || undefined
             };
             const res = await axios.get(`${API_BASE_URL}/workouts/logs`, {
-                headers: authHeaders,
                 params
             });
             dispatch({
@@ -159,7 +153,7 @@ const WorkoutLoggingPage = () => {
         } finally {
             dispatch({ type: 'SET_LOADING', value: false });
         }
-    }, [authHeaders, state.filters, state.pagination.limit]);
+    }, [state.filters, state.pagination.limit]);
 
     useEffect(() => {
         fetchActivePlan();
@@ -183,7 +177,7 @@ const WorkoutLoggingPage = () => {
             {/* Header */}
             <header className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-black tracking-tight uppercase">
+                    <h1 className="text-4xl font-black text-black dark:text-white tracking-tight uppercase">
                         Workout <span className="text-orange-500">Logger</span>
                     </h1>
                     <p className="text-neutral-500 text-sm font-bold uppercase tracking-widest mt-2">
@@ -191,17 +185,17 @@ const WorkoutLoggingPage = () => {
                     </p>
                 </div>
 
-                <div className="flex items-center bg-white border border-neutral-200 p-1.5 rounded-2xl shadow-sm">
+                <div className="flex items-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-1.5 rounded-2xl shadow-sm">
                     <button
                         onClick={() => dispatch({ type: 'SET_FIELD', field: 'isHistoryView', value: false })}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${!state.isHistoryView ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black'}`}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${!state.isHistoryView ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black dark:hover:text-white'}`}
                     >
                         <Plus className="w-4 h-4" />
                         Log Session
                     </button>
                     <button
                         onClick={() => dispatch({ type: 'SET_FIELD', field: 'isHistoryView', value: true })}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${state.isHistoryView ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black'}`}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${state.isHistoryView ? 'bg-black text-white shadow-lg' : 'text-neutral-400 hover:text-black dark:hover:text-white'}`}
                     >
                         <History className="w-4 h-4" />
                         View History

@@ -1,5 +1,9 @@
 import Joi from 'joi';
 
+const analyze = {
+    body: Joi.object().keys({}), // analyze requires no body params — empty body allowed
+};
+
 const adjustPlan = {
     body: Joi.object().keys({
         goal: Joi.string().required().valid('hypertrophy', 'strength', 'endurance'),
@@ -18,6 +22,7 @@ const clearChat = {
 };
 
 export default {
+    analyze,
     adjustPlan,
     chat,
     clearChat,

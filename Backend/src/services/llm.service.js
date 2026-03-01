@@ -5,135 +5,152 @@
  *   callLLM({ mode: 'knowledge' | 'performance' | 'json', messages, outputType: 'text' | 'json' })
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY environment variable is required');
+  console.error("[LLM] GEMINI_API_KEY missing — AI features disabled");
 }
 
-// Initialize the Google Generative AI client once
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+// Proper initialization for @google/genai
+const genAI = GEMINI_API_KEY
+  ? new GoogleGenAI({ apiKey: GEMINI_API_KEY })
+  : null;
 
-// Mode → Gemini model configuration map
-const MODE_PARAMS = {
-    knowledge: { temperature: 0.3, maxOutputTokens: 500 },
-    performance: { temperature: 0.3, maxOutputTokens: 500 },
-    json: { temperature: 0.1, maxOutputTokens: 300 },
-};
+// Safety configuration
+const safetySettings = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 
-// Create model instances
-const geminiJsonModel = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 2048,  // Increased to ensure complete JSON responses
-    },
-});
-
-const geminiTextModel = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 1024,
-    },
-});
+const LLM_TIMEOUT_MS = 15000;
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
 /**
- * Primary entry point for LLM calls.
- *
- * @param {Object} opts
- * @param {'knowledge'|'performance'|'json'} opts.mode
- * @param {Array<{role:'system'|'user'|'assistant', content:string}>} opts.messages
- * @param {'text'|'json'} opts.outputType
- * @returns {Promise<string|Object|null>}
+ * Timeout wrapper
  */
-export const callLLM = async ({ mode = 'knowledge', messages = [], outputType = 'text' }) => {
-    try {
-        // Google Generative AI expects: just the text content, no role/parts wrapper
-        // For simplicity, we concatenate all messages into a single prompt
-        const prompt = messages
-            .map(msg => msg.content)
-            .join('\n\n');
+const withTimeout = (promiseFn, ms, abortController) => {
+  let timeoutId;
 
-        let result;
-        
-        if (outputType === 'json') {
-            result = await geminiJsonModel.generateContent(prompt);
-        } else {
-            result = await geminiTextModel.generateContent(prompt);
-        }
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      abortController?.abort();
+      reject(new Error(`LLM request timed out after ${ms}ms`));
+    }, ms);
+  });
 
-        const raw = result.response.text();
+  return Promise.race([promiseFn(), timeoutPromise]).finally(() =>
+    clearTimeout(timeoutId)
+  );
+};
 
-        if (!raw) {
-            console.warn('[LLM] Empty response from Gemini');
-            return null;
-        }
 
-        if (outputType === 'json') {
-            // Extract JSON from response (may contain markdown wrappers like ```json ... ```)
-            // Remove markdown code block wrappers
-            let cleanedRaw = raw
-                .replace(/^```(?:json)?\s*\n?/m, '')  // Remove opening ```json or ```
-                .replace(/\n?```\s*$/m, '')            // Remove closing ```
-                .trim();
-            
-            // Find complete JSON object (handle { } pairs properly)
-            let braceCount = 0;
-            let inString = false;
-            let escapeNext = false;
-            let jsonStart = -1;
-            
-            for (let i = 0; i < cleanedRaw.length; i++) {
-                const char = cleanedRaw[i];
-                
-                if (escapeNext) {
-                    escapeNext = false;
-                    continue;
-                }
-                
-                if (char === '\\') {
-                    escapeNext = true;
-                    continue;
-                }
-                
-                if (char === '"') {
-                    inString = !inString;
-                    continue;
-                }
-                
-                if (!inString) {
-                    if (char === '{') {
-                        if (braceCount === 0) jsonStart = i;
-                        braceCount++;
-                    }
-                    if (char === '}') {
-                        braceCount--;
-                        if (braceCount === 0 && jsonStart !== -1) {
-                            const jsonStr = cleanedRaw.substring(jsonStart, i + 1);
-                            try {
-                                return JSON.parse(jsonStr);
-                            } catch (parseErr) {
-                                console.error('[LLM] JSON parse error:', parseErr.message, 'JSON:', jsonStr.substring(0, 100));
-                                return null;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            console.warn('[LLM] No complete JSON found in response:', cleanedRaw.substring(0, 150));
-            return null;
-        }
+/**
+ * Extract JSON safely from model output
+ */
+const extractJSON = (raw) => {
+  const cleaned = raw
+    .replace(/^```(?:json)?\s*\n?/m, "")
+    .replace(/\n?```\s*$/m, "")
+    .trim();
 
-        // text mode: strip accidental markdown/JSON wrappers
-        return raw.trim().replace(/^[`"'{\[]+|[`"'}\]]+$/g, '').trim();
-    } catch (err) {
-        console.error('[LLM] callLLM error:', err.message);
-        return null;
+  let braceCount = 0;
+  let inString = false;
+  let escapeNext = false;
+  let jsonStart = -1;
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const char = cleaned[i];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
     }
+
+    if (char === "\\") {
+      escapeNext = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (!inString) {
+      if (char === "{") {
+        if (braceCount === 0) jsonStart = i;
+        braceCount++;
+      }
+
+      if (char === "}") {
+        braceCount--;
+        if (braceCount === 0 && jsonStart !== -1) {
+          const jsonStr = cleaned.substring(jsonStart, i + 1);
+          return JSON.parse(jsonStr);
+        }
+      }
+    }
+  }
+
+  throw new Error("No valid JSON object found in model response");
+};
+
+/**
+ * Main LLM entry point
+ */
+export const callLLM = async ({
+  mode = "knowledge",
+  messages = [],
+  outputType = "text",
+}) => {
+  if (!genAI) {
+    console.warn("[LLM] Gemini client not initialized");
+    return null;
+  }
+
+  try {
+    const prompt = messages.map((m) => m.content).join("\n\n");
+
+    const generationConfig =
+      outputType === "json"
+        ? { temperature: 0.1, maxOutputTokens: 2048 }
+        : { temperature: 0.3, maxOutputTokens: 1024 };
+
+    const response = await withTimeout(
+      genAI.models.generateContent({
+        model: DEFAULT_MODEL,
+        contents: prompt,
+        generationConfig,
+        safetySettings,
+      }),
+      LLM_TIMEOUT_MS
+    );
+
+    const raw = response?.text;
+
+    if (!raw) {
+      console.warn("[LLM] Empty response from Gemini");
+      return null;
+    }
+
+    if (outputType === "json") {
+      try {
+        return extractJSON(raw);
+      } catch (err) {
+        console.error("[LLM] JSON parse error:", err.message);
+        return null;
+      }
+    }
+
+    return raw.trim();
+  } catch (err) {
+    console.error("[LLM] callLLM error:", err.message);
+    return null;
+  }
 };
 
 export default { callLLM };

@@ -3,7 +3,7 @@ import ApiError from "../utils/ApiError.js";
 
 const createWorkoutPlan = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { name, workouts } = req.body;
 
     const workoutPlan = await workoutService.createWorkoutPlan(
@@ -18,7 +18,7 @@ const createWorkoutPlan = async (req, res, next) => {
 
 const fetchActiveWorkoutPlan = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const workoutPlan = await workoutService.fetchActiveWorkoutPlan(userId);
     res.status(200).json(workoutPlan);
   } catch (error) {
@@ -28,7 +28,7 @@ const fetchActiveWorkoutPlan = async (req, res, next) => {
 
 const updateWorkoutPlan = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { name, workouts } = req.body;
 
     const updatedPlan = await workoutService.updateWorkoutPlan(
@@ -43,7 +43,7 @@ const updateWorkoutPlan = async (req, res, next) => {
 
 const deleteWorkoutPlan = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const result = await workoutService.deleteWorkoutPlan(userId);
     res.status(200).json(result);
   } catch (error) {

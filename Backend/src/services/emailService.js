@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
-const EMAIL_USER = process.env.GMAIL_EMAIL; 
-const EMAIL_PASS = process.env.GMAIL_APP_PASSWORD; 
+const EMAIL_USER = process.env.GMAIL_EMAIL;
+const EMAIL_PASS = process.env.GMAIL_APP_PASSWORD;
 
 let transporter = null;
 if (EMAIL_USER && EMAIL_PASS) {
@@ -27,7 +27,10 @@ export const sendOtpEmail = async ({ to, otp }) => {
   `;
 
   if (!transporter) {
-    console.log(`[Email disabled] OTP for ${to}: ${otp}`);
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Email transporter is not configured. Cannot send OTP.');
+    }
+    console.log(`[Email disabled] OTP email would be sent to: ${to}`);
     return;
   }
 

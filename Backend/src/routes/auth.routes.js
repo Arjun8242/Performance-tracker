@@ -4,6 +4,7 @@ import { validate } from '../middleware/validate.middleware.js';
 import * as authValidation from '../validations/auth.validation.js';
 import { authLimiter } from '../middleware/rateLimiter.middleware.js';
 
+
 const router = express.Router();
 
 // Register -> sends OTP to email
@@ -17,5 +18,8 @@ router.post('/resend-otp', authLimiter, validate(authValidation.resendOtp), auth
 
 // Login (requires verified email)
 router.post('/login', authLimiter, validate(authValidation.login), authController.login);
+
+// Logout
+router.post('/logout', authController.logout);
 
 export default router;

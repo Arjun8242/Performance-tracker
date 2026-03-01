@@ -1,7 +1,7 @@
 import express from 'express';
 import { protect } from '../middleware/auth.middleware.js';
 import aiController from '../controllers/ai.controller.js';
-import { aiAnalysisLimiter } from '../middleware/rateLimiter.middleware.js';
+import { aiAnalysisLimiter, aiChatLimiter } from '../middleware/rateLimiter.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
 import aiValidation from '../validations/ai.validation.js';
 
@@ -20,7 +20,7 @@ router.get('/context', aiController.getContext);
  * POST /ai/analyze
  * Performance analysis — strict JSON output, rate limited 24h
  */
-router.post('/analyze', aiController.analyzePerformance);
+router.post('/analyze', aiAnalysisLimiter, validate(aiValidation.analyze), aiController.analyzePerformance);
 
 /**
  * POST /ai/adjust-plan
@@ -34,7 +34,7 @@ router.post('/adjust-plan', validate(aiValidation.adjustPlan), aiController.adju
  * DELETE /ai/chat — Clear chat history
  */
 router.get('/chat', aiController.getChatHistory);
-router.post('/chat', validate(aiValidation.chat), aiController.chat);
+router.post('/chat', aiChatLimiter, validate(aiValidation.chat), aiController.chat);
 router.delete('/chat', aiController.clearChat);
 
 export default router;

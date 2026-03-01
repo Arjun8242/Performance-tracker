@@ -46,9 +46,9 @@ const OrbitingPill = ({ index, total, feature, onArrival }) => {
                     shadow-[0_10px_40px_rgba(0,0,0,0.1)]">
 
                     <div className="flex flex-col items-center gap-6">
-                        <feature.icon className="w-6 h-6 text-black" />
+                        <feature.icon className="w-6 h-6 text-black dark:text-white" />
                         <span
-                            className="text-[14px] font-black uppercase tracking-tighter text-black"
+                            className="text-[14px] font-black uppercase tracking-tighter text-black dark:text-white"
                             style={{
                                 writingMode: 'vertical-rl',
                                 transform: 'rotate(180deg)',

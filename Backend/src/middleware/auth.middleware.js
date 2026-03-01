@@ -18,15 +18,19 @@ import User from '../models/user.model.js';
  */
 const protect = async (req, res, next) => {
     try {
-        // Extract token from Authorization header
+        // Extract token from Authorization header or cookies
         const authHeader = req.headers.authorization;
+        let token;
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new ApiError(httpStatus.UNAUTHORIZED, 'Access denied. No token provided');
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        } else if (req.cookies && req.cookies.access_token) {
+            token = req.cookies.access_token;
         }
 
-        // Get token from "Bearer <token>"
-        const token = authHeader.split(' ')[1];
+        if (!token) {
+            throw new ApiError(httpStatus.UNAUTHORIZED, 'Access denied. No token provided');
+        }
 
         // Verify token and extract payload
         const decoded = verifyToken(token);
@@ -38,9 +42,8 @@ const protect = async (req, res, next) => {
         }
 
         // Attach user to request for use in route handlers
+        // req.user.id is available via Mongoose virtual (string version of _id)
         req.user = user;
-        // Backward compatibility if mostly userId is used, but now we have full user
-        req.user.userId = user._id;
 
         next();
     } catch (error) {
