@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,18 +29,11 @@ const WorkoutPlanPage = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [activeDayIndex, setActiveDayIndex] = useState(null);
 
-    const authHeaders = useMemo(() => {
-        const token = localStorage.getItem('auth_token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }, []);
-
     const fetchPlan = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await axios.get(`${API_BASE_URL}/workouts/plan`, {
-                headers: authHeaders
-            });
+            const res = await axios.get(`${API_BASE_URL}/workouts/plan`);
             if (res.data) {
                 setPlan(res.data);
                 setOriginalPlan(JSON.parse(JSON.stringify(res.data)));
@@ -52,7 +45,7 @@ const WorkoutPlanPage = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [authHeaders]);
+    }, []);
 
     useEffect(() => {
         fetchPlan();
@@ -219,9 +212,7 @@ const WorkoutPlanPage = () => {
                 }))
             };
 
-            await axios.put(`${API_BASE_URL}/workouts/plan`, payload, {
-                headers: authHeaders
-            });
+            await axios.put(`${API_BASE_URL}/workouts/plan`, payload);
 
             setOriginalPlan(JSON.parse(JSON.stringify(plan)));
             setIsEditing(false);
@@ -244,7 +235,7 @@ const WorkoutPlanPage = () => {
         if (!window.confirm('Delete entire workout plan?')) return;
         setIsSaving(true);
         try {
-            await axios.delete(`${API_BASE_URL}/workouts/plan`, { headers: authHeaders });
+            await axios.delete(`${API_BASE_URL}/workouts/plan`);
             setPlan(null);
             setOriginalPlan(null);
             setIsEditing(false);
@@ -262,7 +253,7 @@ const WorkoutPlanPage = () => {
                     <Dumbbell className="w-10 h-10 text-orange-500 absolute inset-0 m-auto animate-pulse" />
                 </div>
                 <div className="text-center">
-                    <p className="text-2xl font-black text-black uppercase tracking-tighter">Syncing Stats</p>
+                    <p className="text-2xl font-black text-black dark:text-white uppercase tracking-tighter">Syncing Stats</p>
                     <p className="text-neutral-500 font-medium">Preparing your elite routine...</p>
                 </div>
             </div>
@@ -275,18 +266,18 @@ const WorkoutPlanPage = () => {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center space-y-8 bg-white border border-neutral-100 p-16 rounded-[4rem] shadow-2xl relative overflow-hidden"
+                    className="text-center space-y-8 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-16 rounded-[4rem] shadow-2xl relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                         <Trophy className="w-64 h-64 text-orange-500" />
                     </div>
 
-                    <div className="w-24 h-24 bg-orange-500 text-white rounded-[2rem] flex items-center justify-center mx-auto shadow-xl shadow-orange-500/20">
+                    <div className="w-24 h-24 bg-orange-500 text-white rounded-4xl flex items-center justify-center mx-auto shadow-xl shadow-orange-500/20">
                         <Zap className="w-12 h-12" />
                     </div>
 
                     <div className="space-y-4">
-                        <h1 className="text-5xl font-black text-black tracking-tighter uppercase">No Active Protocol</h1>
+                        <h1 className="text-5xl font-black text-black dark:text-white tracking-tighter uppercase">No Active Protocol</h1>
                         <p className="text-neutral-500 text-xl max-w-lg mx-auto leading-relaxed">
                             Your training evolution begins here. Start by building a protocol tailored to your physical peak.
                         </p>
@@ -337,14 +328,14 @@ const WorkoutPlanPage = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-white p-6 rounded-[2.5rem] border border-neutral-100 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow"
+                            className="bg-white dark:bg-neutral-900 p-6 rounded-[2.5rem] border border-neutral-100 dark:border-neutral-800 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow"
                         >
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${stat.color}`}>
                                 <stat.icon className="w-6 h-6" />
                             </div>
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">{stat.label}</p>
-                                <p className="text-xl font-black text-black">{stat.value}</p>
+                                <p className="text-xl font-black text-black dark:text-white">{stat.value}</p>
                             </div>
                         </motion.div>
                     ))}
@@ -376,12 +367,12 @@ const WorkoutPlanPage = () => {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="py-32 text-center border-4 border-dashed border-neutral-100 rounded-[4rem] bg-neutral-50/50 space-y-4"
+                        className="py-32 text-center border-4 border-dashed border-neutral-100 dark:border-neutral-700 rounded-[4rem] bg-neutral-50/50 dark:bg-neutral-900/40 space-y-4"
                     >
                         <div className="w-20 h-20 bg-neutral-200 rounded-full flex items-center justify-center mx-auto">
                             <AlertCircle className="w-10 h-10 text-neutral-400" />
                         </div>
-                        <h3 className="text-2xl font-black text-black uppercase tracking-tight">System Purged</h3>
+                        <h3 className="text-2xl font-black text-black dark:text-white uppercase tracking-tight">System Purged</h3>
                         <p className="text-neutral-500 font-medium">Initialize a new training session to proceed.</p>
                     </motion.div>
                 )}

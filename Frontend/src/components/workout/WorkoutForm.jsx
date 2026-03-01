@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ClipboardList, Plus, Trash2, Save, Loader2,
@@ -24,10 +24,6 @@ const WorkoutForm = ({
         isSubmitting
     } = state;
 
-    const authHeaders = useMemo(() => {
-        const token = localStorage.getItem('auth_token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }, []);
 
     const getLocalDateString = (date = new Date()) => {
         const year = date.getFullYear();
@@ -115,7 +111,7 @@ const WorkoutForm = ({
                 notes
             };
 
-            await axios.post(`${API_BASE_URL}/workouts/log`, payload, { headers: authHeaders });
+            await axios.post(`${API_BASE_URL}/workouts/log`, payload);
             dispatch({ type: 'SET_MESSAGE', payload: { type: 'success', text: 'Workout logged successfully!' } });
             onSuccess();
             setTimeout(() => dispatch({ type: 'SET_MESSAGE', payload: { type: '', text: '' } }), 5000);
@@ -130,10 +126,10 @@ const WorkoutForm = ({
     return (
         <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Session Details */}
-            <div className="bg-white rounded-[2rem] border border-neutral-100 p-8 shadow-sm">
+            <div className="bg-white dark:bg-neutral-900 rounded-4xl border border-neutral-100 dark:border-neutral-800 p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div>
-                        <h2 className="text-2xl font-bold text-neutral-900 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
                             <ClipboardList className="w-6 h-6 text-orange-500" />
                             Session Details
                         </h2>
@@ -153,7 +149,7 @@ const WorkoutForm = ({
                                     onClick={() => dispatch({ type: 'SET_FIELD', field: 'logDate', value: ds })}
                                     className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${isActive
                                         ? 'bg-black text-white border-black shadow-lg shadow-black/10'
-                                        : 'bg-white text-neutral-400 border-neutral-200 hover:border-neutral-300'
+                                        : 'bg-white dark:bg-neutral-900 text-neutral-400 border-neutral-200 dark:border-neutral-700 hover:border-neutral-300'
                                         }`}
                                 >
                                     {d}
@@ -170,7 +166,7 @@ const WorkoutForm = ({
                             <select
                                 value={selectedWorkoutId}
                                 onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'selectedWorkoutId', value: e.target.value })}
-                                className="w-full pl-4 pr-10 py-3.5 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-bold appearance-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all cursor-pointer"
+                                className="w-full pl-4 pr-10 py-3.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl text-sm font-bold text-black dark:text-white appearance-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all cursor-pointer"
                             >
                                 <option value="">Select a workout...</option>
                                 {activePlan?.workouts?.filter(w => {
@@ -202,7 +198,7 @@ const WorkoutForm = ({
                                     onClick={() => dispatch({ type: 'SET_FIELD', field: 'status', value: s })}
                                     className={`flex-1 py-3 rounded-2xl border transition-all font-bold text-xs uppercase tracking-widest ${status === s
                                         ? 'bg-neutral-900 text-white border-neutral-900 shadow-lg scale-[1.02]'
-                                        : 'bg-white text-neutral-500 border-neutral-200 hover:border-neutral-300'
+                                        : 'bg-white dark:bg-neutral-900 text-neutral-500 border-neutral-200 dark:border-neutral-700 hover:border-neutral-300'
                                         }`}
                                 >
                                     {s}
@@ -223,7 +219,7 @@ const WorkoutForm = ({
                         className="space-y-4"
                     >
                         <div className="flex items-center justify-between px-4">
-                            <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
                                 <Dumbbell className="w-5 h-5 text-orange-500" />
                                 Performed Exercises
                             </h3>
@@ -238,7 +234,7 @@ const WorkoutForm = ({
                         </div>
 
                         {performedExercises.length === 0 ? (
-                            <div className="bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-[2rem] p-12 text-center">
+                            <div className="bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-4xl p-12 text-center">
                                 <p className="text-neutral-400 font-medium">No exercises added yet.</p>
                             </div>
                         ) : (
@@ -247,11 +243,11 @@ const WorkoutForm = ({
                                     <motion.div
                                         key={idx}
                                         layout
-                                        className="bg-white p-6 rounded-[2rem] border border-neutral-100 flex flex-wrap items-center gap-6 shadow-sm hover:shadow-md transition-shadow group"
+                                        className="bg-white dark:bg-neutral-900 p-6 rounded-4xl border border-neutral-100 dark:border-neutral-800 flex flex-wrap items-center gap-6 shadow-sm hover:shadow-md transition-shadow group"
                                     >
                                         <div className="flex-1 min-w-[200px]">
                                             <p className="text-[10px] uppercase tracking-widest font-black text-neutral-400 mb-1">Exercise</p>
-                                            <h4 className="text-xl font-black text-black uppercase tracking-tight">{ex.name}</h4>
+                                            <h4 className="text-xl font-black text-black dark:text-white uppercase tracking-tight">{ex.name}</h4>
                                             <button
                                                 type="button"
                                                 onClick={() => dispatch({ type: 'REMOVE_EXERCISE', index: idx })}
@@ -263,8 +259,8 @@ const WorkoutForm = ({
 
                                         <div className="w-full lg:flex-1 space-y-3">
                                             {ex.sets.map((set, sIdx) => (
-                                                <div key={sIdx} className="flex items-center gap-4 bg-neutral-50 p-3 rounded-2xl border border-neutral-100 group/set">
-                                                    <div className="w-8 h-8 rounded-lg bg-white border border-neutral-200 flex items-center justify-center text-[10px] font-black text-neutral-400">
+                                                <div key={sIdx} className="flex items-center gap-4 bg-neutral-50 dark:bg-neutral-800 p-3 rounded-2xl border border-neutral-100 dark:border-neutral-700 group/set">
+                                                    <div className="w-8 h-8 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center text-[10px] font-black text-neutral-400">
                                                         {sIdx + 1}
                                                     </div>
                                                     <div className="flex-1 grid grid-cols-2 gap-4">
@@ -273,7 +269,7 @@ const WorkoutForm = ({
                                                                 type="number"
                                                                 value={set.reps}
                                                                 onChange={(e) => dispatch({ type: 'UPDATE_EXERCISE_SET', payload: { exIdx: idx, setIdx: sIdx, field: 'reps', value: parseInt(e.target.value) || 0 } })}
-                                                                className="w-full bg-transparent border-none p-0 focus:ring-0 font-bold text-black text-right"
+                                                                className="w-full bg-transparent border-none p-0 focus:ring-0 font-bold text-black dark:text-white text-right"
                                                             />
                                                             <span className="text-[10px] font-black text-neutral-400">REPS</span>
                                                         </div>
@@ -282,7 +278,7 @@ const WorkoutForm = ({
                                                                 type="number"
                                                                 value={set.weight}
                                                                 onChange={(e) => dispatch({ type: 'UPDATE_EXERCISE_SET', payload: { exIdx: idx, setIdx: sIdx, field: 'weight', value: parseFloat(e.target.value) || 0 } })}
-                                                                className="w-full bg-transparent border-none p-0 focus:ring-0 font-bold text-black text-right"
+                                                                className="w-full bg-transparent border-none p-0 focus:ring-0 font-bold text-black dark:text-white text-right"
                                                             />
                                                             <span className="text-[10px] font-black text-neutral-400">KG</span>
                                                         </div>
@@ -314,8 +310,8 @@ const WorkoutForm = ({
             </AnimatePresence>
 
             {/* Notes Section */}
-            <div className="bg-white rounded-[2rem] border border-neutral-100 p-8 shadow-sm">
-                <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2 mb-4">
+            <div className="bg-white dark:bg-neutral-900 rounded-4xl border border-neutral-100 dark:border-neutral-800 p-8 shadow-sm">
+                <h3 className="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2 mb-4">
                     <Notebook className="w-5 h-5 text-orange-500" />
                     Session Notes
                 </h3>
@@ -323,7 +319,7 @@ const WorkoutForm = ({
                     value={notes}
                     onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'notes', value: e.target.value })}
                     placeholder="How did it feel? Any PRs? Any pain?"
-                    className="w-full min-h-[120px] bg-neutral-50 border border-neutral-200 rounded-2xl p-4 text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none"
+                    className="w-full min-h-[120px] bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-4 text-sm font-medium text-black dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all resize-none"
                 />
             </div>
 

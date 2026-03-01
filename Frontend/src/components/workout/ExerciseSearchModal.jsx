@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Dumbbell, Loader2, Info, Plus } from 'lucide-react';
@@ -10,11 +10,6 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
 
-    const authHeaders = useMemo(() => {
-        const token = localStorage.getItem('auth_token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }, []);
-
     const handleSearch = useCallback(async (query) => {
         if (!query.trim()) {
             setSearchResults([]);
@@ -23,8 +18,7 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
         setIsSearching(true);
         try {
             const res = await axios.get(`${API_BASE_URL}/exercises`, {
-                params: { search: query, limit: 10 },
-                headers: authHeaders
+                params: { search: query, limit: 10 }
             });
             setSearchResults(res.data.exercises || []);
         } catch (err) {
@@ -32,7 +26,7 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
         } finally {
             setIsSearching(false);
         }
-    }, [authHeaders]);
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => handleSearch(searchQuery), 300);
@@ -50,7 +44,7 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -62,15 +56,15 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-neutral-200"
+                        className="relative w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-4xl shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800"
                     >
-                        <div className="p-8 flex flex-col h-[600px]">
+                        <div className="p-8 flex flex-col h-150">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
+                                <h3 className="text-2xl font-black text-black dark:text-white uppercase tracking-tight flex items-center gap-3">
                                     <Search className="w-6 h-6 text-orange-500" />
                                     Quick Add Exercise
                                 </h3>
-                                <button onClick={onClose} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
+                                <button onClick={onClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
                                     <X className="w-6 h-6 text-neutral-400" />
                                 </button>
                             </div>
@@ -83,7 +77,7 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
                                     placeholder="Search exercises (e.g., Bench Press, Squat)..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-14 pr-6 py-5 bg-neutral-50 border border-neutral-100 rounded-2xl focus:border-orange-500 outline-none font-bold text-lg shadow-inner"
+                                    className="w-full pl-14 pr-6 py-5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-2xl focus:border-orange-500 outline-none font-bold text-lg text-black dark:text-white shadow-inner"
                                 />
                             </div>
 
@@ -99,17 +93,17 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
                                             <button
                                                 key={ex.id || ex._id}
                                                 onClick={() => onSelectExercise(ex)}
-                                                className="w-full flex items-center justify-between p-5 bg-white border border-neutral-100 rounded-2xl hover:border-orange-500 hover:bg-orange-50/50 transition-all group active:scale-[0.98]"
+                                                className="w-full flex items-center justify-between p-5 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-700 rounded-2xl hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-500/10 transition-all group active:scale-[0.98]"
                                             >
                                                 <div className="flex items-center gap-5">
-                                                    <div className="w-12 h-12 bg-neutral-50 rounded-xl flex items-center justify-center group-hover:bg-white transition-colors">
+                                                    <div className="w-12 h-12 bg-neutral-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center group-hover:bg-white dark:group-hover:bg-neutral-900 transition-colors">
                                                         <Dumbbell className="w-6 h-6 text-orange-500" />
                                                     </div>
                                                     <div className="text-left">
-                                                        <h4 className="font-black text-black uppercase text-sm tracking-tight">{ex.name}</h4>
+                                                        <h4 className="font-black text-black dark:text-white uppercase text-sm tracking-tight">{ex.name}</h4>
                                                         <div className="flex gap-2 mt-1">
-                                                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-tighter bg-neutral-100 px-2 py-0.5 rounded-full">{ex.muscleGroup}</span>
-                                                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-tighter bg-neutral-100 px-2 py-0.5 rounded-full">{ex.difficulty}</span>
+                                                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-tighter bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">{ex.muscleGroup}</span>
+                                                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-tighter bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">{ex.difficulty}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -119,7 +113,7 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
                                     </div>
                                 ) : searchQuery.length > 2 ? (
                                     <div className="h-full flex flex-col items-center justify-center text-center space-y-2">
-                                        <p className="text-black font-black uppercase">No results found</p>
+                                        <p className="text-black dark:text-white font-black uppercase">No results found</p>
                                         <p className="text-neutral-400 text-sm font-medium">Try a different search term or check spelling.</p>
                                     </div>
                                 ) : (

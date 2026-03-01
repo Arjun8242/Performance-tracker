@@ -33,4 +33,26 @@ const login = {
     }),
 };
 
-export { signup, login };
+const verify = {
+    body: Joi.object().keys({
+        email: Joi.string().email().required().messages({
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required',
+        }),
+        otp: Joi.string().pattern(/^[0-9]{6}$/).required().messages({
+            'string.pattern.base': 'OTP must be a 6 digit code',
+            'any.required': 'OTP is required',
+        }),
+    }),
+};
+
+const resendOtp = {
+    body: Joi.object().keys({
+        email: Joi.string().email().required().messages({
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required',
+        }),
+    }),
+};
+
+export { signup, login, verify, resendOtp };

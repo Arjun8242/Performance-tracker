@@ -16,7 +16,7 @@ const ProgressOverview = ({ summary, streak, isLoading, error }) => {
                         key={i}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="animate-pulse bg-neutral-100 rounded-[2.5rem] h-48"
+                        className="animate-pulse bg-neutral-100 dark:bg-neutral-800 rounded-[2.5rem] h-48"
                     />
                 ))}
             </div>
@@ -74,12 +74,12 @@ const ProgressOverview = ({ summary, streak, isLoading, error }) => {
             {/* Card 1: Weekly Completion */}
             <motion.div
                 variants={itemVariants}
-                className={`bg-white border p-8 rounded-[2.5rem] shadow-sm transition-all duration-500 ${isCompleted ? 'border-emerald-500/30 ring-4 ring-emerald-500/5' : 'border-neutral-200'}`}
+                className={`bg-white dark:bg-neutral-900 border p-8 rounded-[2.5rem] shadow-sm transition-all duration-500 ${isCompleted ? 'border-emerald-500/30 ring-4 ring-emerald-500/5 dark:ring-emerald-500/20' : 'border-neutral-200 dark:border-neutral-800'}`}
             >
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <p className="text-[10px] uppercase tracking-[0.2em] font-black text-neutral-400 mb-2">Weekly Completion</p>
-                        <h3 className="text-4xl font-black text-black tracking-tight">
+                        <h3 className="text-4xl font-black text-black dark:text-white tracking-tight">
                             {percentage}%
                         </h3>
                     </div>
@@ -92,7 +92,7 @@ const ProgressOverview = ({ summary, streak, isLoading, error }) => {
                     {summary?.total === 0 ? 'No plan yet' : `${summary?.completed || 0} of ${summary?.total || 0} workouts completed`}
                 </p>
 
-                <div className="h-3 bg-neutral-100 rounded-full overflow-hidden">
+                <div className="h-3 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                     <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percentage}%` }}
@@ -105,7 +105,7 @@ const ProgressOverview = ({ summary, streak, isLoading, error }) => {
             {/* Card 2: Current Streak */}
             <motion.div
                 variants={itemVariants}
-                className="bg-white border border-neutral-200 p-8 rounded-[2.5rem] shadow-sm group hover:border-orange-500/30 transition-colors duration-500"
+                className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2.5rem] shadow-sm group hover:border-orange-500/30 dark:hover:border-orange-500/50 transition-colors duration-500"
             >
                 <div className="flex justify-between items-start mb-6">
                     <div>
@@ -115,7 +115,7 @@ const ProgressOverview = ({ summary, streak, isLoading, error }) => {
                                 key={streak?.currentStreak}
                                 initial={{ scale: 1.2, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
-                                className="text-4xl font-black text-black tracking-tight"
+                                className="text-4xl font-black text-black dark:text-white tracking-tight"
                             >
                                 {streak?.currentStreak || 0}
                             </motion.h3>
@@ -143,7 +143,7 @@ const ProgressOverview = ({ summary, streak, isLoading, error }) => {
             {/* Card 3: Motivation Status */}
             <motion.div
                 variants={itemVariants}
-                className="bg-neutral-900 border border-neutral-800 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group"
+                className="bg-neutral-900 dark:bg-black border border-neutral-800 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group"
             >
                 {/* Background Decoration */}
                 <motion.div

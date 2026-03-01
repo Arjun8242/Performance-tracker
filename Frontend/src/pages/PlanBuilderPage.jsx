@@ -148,7 +148,6 @@ const PlanBuilderPage = () => {
         setError(null);
 
         try {
-            const token = localStorage.getItem('auth_token');
             const payload = {
                 name: planDraft.name,
                 workouts: planDraft.workouts.map(w => ({
@@ -163,9 +162,7 @@ const PlanBuilderPage = () => {
                 }))
             };
 
-            await axios.post(`${API_BASE_URL}/workouts/plan`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await axios.post(`${API_BASE_URL}/workouts/plan`, payload);
 
             navigate('/dashboard');
         } catch (err) {

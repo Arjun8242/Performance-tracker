@@ -23,7 +23,7 @@ const PlanBuilderHeader = ({
             <div className="space-y-4 flex-1">
                 <button
                     onClick={() => navigate(backPath)}
-                    className="flex items-center gap-2 text-neutral-500 hover:text-black font-bold transition-colors mb-4 group"
+                    className="flex items-center gap-2 text-neutral-500 hover:text-black dark:hover:text-white font-bold transition-colors mb-4 group"
                 >
                     <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                     {backLabel}
@@ -36,7 +36,7 @@ const PlanBuilderHeader = ({
                         value={planName}
                         disabled={!isEditing}
                         onChange={(e) => onNameChange(e.target.value)}
-                        className={`w-full text-5xl font-black bg-transparent border-none focus:ring-0 placeholder:text-neutral-100 p-0 tracking-tighter transition-all ${!isEditing ? 'cursor-default' : 'hover:translate-x-1'} ${nameError ? 'text-red-600' : 'text-black'}`}
+                        className={`w-full text-5xl font-black bg-transparent border-none focus:ring-0 placeholder:text-neutral-100 p-0 tracking-tighter transition-all ${!isEditing ? 'cursor-default' : 'hover:translate-x-1'} ${nameError ? 'text-red-600' : 'text-black dark:text-white'}`}
                     />
                     {isEditing && <div className={`h-1 bg-orange-500 rounded-full transition-all duration-500 ${planName ? 'w-32 opacity-100' : 'w-0 opacity-0'}`} />}
                 </div>
@@ -47,7 +47,7 @@ const PlanBuilderHeader = ({
                     <>
                         <button
                             onClick={onAddDay}
-                            className="flex items-center gap-2 px-6 py-4 bg-white border border-neutral-200 text-black rounded-2xl font-bold hover:bg-neutral-50 transition-all active:scale-95"
+                            className="flex items-center gap-2 px-6 py-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-black dark:text-white rounded-2xl font-bold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all active:scale-95"
                         >
                             <Plus className="w-5 h-5" />
                             Add Day
@@ -55,7 +55,7 @@ const PlanBuilderHeader = ({
                         {onCancel && (
                             <button
                                 onClick={onCancel}
-                                className="px-6 py-4 text-neutral-500 font-bold hover:text-black transition-all"
+                                className="px-6 py-4 text-neutral-500 font-bold hover:text-black dark:hover:text-white transition-all"
                             >
                                 Cancel
                             </button>

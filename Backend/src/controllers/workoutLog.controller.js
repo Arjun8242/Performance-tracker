@@ -5,7 +5,7 @@ import ApiError from '../utils/ApiError.js';
 const logWorkout = async (req, res, next) => {
   try {
     const { workoutId, date, status, performedExercises, notes } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     if (!workoutId || !date || !status) {
       throw new ApiError(400, 'Workout ID, date, and status are required');
@@ -31,7 +31,7 @@ const logWorkout = async (req, res, next) => {
 
 const getWorkoutLogs = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { from, to, page = 1, limit = 10 } = req.query;
 
     let fromDate = from

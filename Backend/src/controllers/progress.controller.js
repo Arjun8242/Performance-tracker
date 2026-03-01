@@ -7,7 +7,7 @@ import * as progressService from '../services/progress.service.js';
  */
 const getStreak = async (req, res, next) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.id;
         const currentStreak = await progressService.calculateStreak(userId);
         res.status(httpStatus.OK).json({ currentStreak });
     } catch (error) {
@@ -21,7 +21,7 @@ const getStreak = async (req, res, next) => {
  */
 const getSummary = async (req, res, next) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.id;
         const summary = await progressService.getWeeklySummary(userId);
         res.status(httpStatus.OK).json(summary);
     } catch (error) {
@@ -35,7 +35,7 @@ const getSummary = async (req, res, next) => {
  */
 const getMonth = async (req, res, next) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.id;
         const { month, year } = req.query;
         const heatmap = await progressService.getMonthHeatmap(
             userId,
@@ -54,7 +54,7 @@ const getMonth = async (req, res, next) => {
  */
 const getInsights = async (req, res, next) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.id;
         const insights = await progressService.getInsights(userId);
         res.status(httpStatus.OK).json({ insights });
     } catch (error) {
@@ -68,7 +68,7 @@ const getInsights = async (req, res, next) => {
  */
 const getExerciseAnalytics = async (req, res, next) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.id;
         const { exerciseId } = req.params;
         const analytics = await progressService.getExerciseAnalytics(userId, exerciseId);
 
@@ -93,7 +93,7 @@ const getExerciseAnalytics = async (req, res, next) => {
  */
 const getPerformedExercises = async (req, res, next) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.id;
         const exercises = await progressService.getPerformedExercises(userId);
         res.status(httpStatus.OK).json(exercises);
     } catch (error) {

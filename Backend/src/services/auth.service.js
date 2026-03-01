@@ -1,93 +1,162 @@
 import httpStatus from 'http-status';
+import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import { generateToken } from '../utils/token.js';
+import { sendOtpEmail } from './emailService.js';
+import logger from '../utils/logger.js';
+
+const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+const generate6DigitOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 /**
- * Auth Service
- * 
- * Why keep auth logic in services?
- * - Controllers handle HTTP request/response only
- * - Services contain business logic (reusable across controllers, tests, background jobs)
- * - Easy to unit test without HTTP layer
- * - Clean separation: routes → controllers → services → models
- * - Services can orchestrate multiple models and utilities
- */
-
-/**
- * Register a new user
- * @param {Object} userBody - User creation data
- * @returns {Promise<string>} JWT token
- * @throws {ApiError} 409 if email already exists, 400 for validation errors
+ * Register a new user or update an unverified user's OTP
  */
 const signup = async (userBody) => {
     const { email, password } = userBody;
-    // Validate inputs
+
+    // Basic verification of required fields
     if (!email || !password) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Email and password are required');
     }
 
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid email format');
+    const normalizedEmail = email.toLowerCase();
+    let user = await User.findOne({ email: normalizedEmail });
+
+    if (user) {
+        if (user.isVerified) {
+            throw new ApiError(httpStatus.CONFLICT, 'Email already registered and verified');
+        }
+        // Fix for lockout: Update unverified user with new password and OTP
+        user.password = password;
+    } else {
+        // Create new user
+        user = new User({
+            ...userBody,
+            email: normalizedEmail,
+        });
     }
 
-    // Password strength validation
-    if (password.length < 8) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Password must be at least 8 characters');
-    }
+    const rawOtp = generate6DigitOtp();
+    user.otpHash = await bcrypt.hash(rawOtp, 12);
+    user.otpExpires = new Date(Date.now() + OTP_TTL_MS);
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-        throw new ApiError(httpStatus.CONFLICT, 'Email already registered');
-    }
+    await user.save();
 
-    // Create user (password is hashed by pre-save hook in user model)
-    const user = await User.create({
-        ...userBody,
-        email: email.toLowerCase(),
-    });
+    // Send email async
+    sendOtpEmail({ to: user.email, otp: rawOtp }).catch((e) =>
+        logger.error(`OTP email failed for user ${user._id}:`, { error: e.message, stack: e.stack })
+    );
 
-    // Generate token with minimal payload (userId only)
-    const token = generateToken(user._id.toString());
-
-    return token;
+    return { message: 'OTP sent to email' };
 };
 
 /**
- * Authenticate user with email and password
- * @param {string} email - User email
- * @param {string} password - Plain text password
- * @returns {Promise<string>} JWT token
- * @throws {ApiError} 401 for invalid credentials (generic message to prevent enumeration)
+ * Verify OTP
+ */
+const verifyOTP = async (email, otp) => {
+    if (!email || !otp) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Email and OTP are required');
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+otpHash +otpExpires');
+    if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    if (!user.otpHash || !user.otpExpires) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'No active OTP found. Please request a new one.');
+    }
+
+    if (user.otpExpires < new Date()) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'OTP expired. Request a new one.');
+    }
+
+    const isMatch = await bcrypt.compare(otp, user.otpHash);
+    if (!isMatch) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid OTP');
+    }
+
+    user.isVerified = true;
+    user.otpHash = null;
+    user.otpExpires = null;
+    await user.save();
+
+    const userWithoutOtp = user.toObject();
+    delete userWithoutOtp.otpHash;
+    delete userWithoutOtp.otpExpires;
+
+    const token = generateToken(user._id.toString());
+    return {
+        message: 'Email verified successfully',
+        user: userWithoutOtp,
+        token
+    };
+};
+
+/**
+ * Resend OTP
+ */
+const resendOTP = async (email) => {
+    if (!email) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Email is required');
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    if (user.isVerified) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already verified');
+    }
+
+    const rawOtp = generate6DigitOtp();
+    user.otpHash = await bcrypt.hash(rawOtp, 12);
+    user.otpExpires = new Date(Date.now() + OTP_TTL_MS);
+
+    await user.save();
+
+    sendOtpEmail({ to: user.email, otp: rawOtp }).catch((e) =>
+        logger.error(`Resend OTP email failed for user ${user._id}:`, { error: e.message, stack: e.stack })
+    );
+
+    return { message: 'New OTP sent to email' };
+};
+
+/**
+ * Login user
  */
 const login = async (email, password) => {
-    // Validate inputs
     if (!email || !password) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Email and password are required');
     }
 
-    // Find user and explicitly select password field (excluded by default)
     const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
-
-    // Generic error message - don't reveal if email exists or not
-    // This prevents user enumeration attacks
     if (!user) {
         throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
     }
 
-    // Verify password using model method
+    if (!user.isVerified) {
+        throw new ApiError(httpStatus.FORBIDDEN, 'Please verify your email before logging in');
+    }
+
     const isPasswordValid = await user.isPasswordMatch(password);
     if (!isPasswordValid) {
         throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
     }
 
-    // Generate token with minimal payload
-    const token = generateToken(user._id.toString());
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
 
-    return token;
+    const token = generateToken(user._id.toString());
+    return { user: userWithoutPassword, token };
 };
 
-export { signup, login };
+export default {
+    signup,
+    login,
+    verifyOTP,
+    resendOTP
+};

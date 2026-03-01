@@ -40,6 +40,47 @@ const userSchema = new mongoose.Schema(
       required: true,
       select: false, // never returned by default
     },
+
+    // AI Cache fields (24h per-user cache for analyzePerformance)
+    lastAnalysis: {
+      type: Object,
+      default: null, // Stores the last valid AI JSON result: { summary, strengths, risks, recommendation }
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    otpHash: {
+      type: String,
+      select: false,
+      default: null,
+    },
+
+    lastAnalysisAt: {
+      type: Date,
+      default: null, // Timestamp of last successful analysis
+    },
+    otpExpires: {
+      type: Date,
+      default: null,
+    },
+
+    avatar: {
+      type: String,
+      default: null,
+    },
+
+    theme: {
+      type: String,
+      enum: ["light", "dark"],
+      default: "light",
+    },
+
+    nutritionProfile: {
+      type: Object,
+      default: null, // { calories, protein }
+    },
   },
   {
     timestamps: true,

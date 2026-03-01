@@ -123,7 +123,7 @@ const WorkoutLibraryPage = () => {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-4xl font-extrabold tracking-tight text-black mb-2 flex items-center gap-3">
+                <h1 className="text-4xl font-extrabold tracking-tight text-black dark:text-white mb-2 flex items-center gap-3">
                     Workout <span className="text-orange-500">Library</span>
                     <LibraryBadge count={pagination.total} />
                 </h1>
@@ -142,7 +142,7 @@ const WorkoutLibraryPage = () => {
 
 
             {/* Exercise Grid or Error/Empty State */}
-            <div className="min-h-[400px] relative">
+            <div className="min-h-96 relative">
                 <AnimatePresence mode="wait">
                     {isLoading ? (
                         <motion.div
@@ -161,7 +161,7 @@ const WorkoutLibraryPage = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="bg-red-50 border border-red-100 p-8 rounded-[2rem] flex flex-col items-center text-center gap-4"
+                            className="bg-red-50 border border-red-100 p-8 rounded-4xl flex flex-col items-center text-center gap-4"
                         >
                             <AlertCircle className="w-12 h-12 text-red-500" />
                             <div>
@@ -181,13 +181,13 @@ const WorkoutLibraryPage = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="bg-neutral-100/50 border border-neutral-200 p-12 rounded-[2rem] flex flex-col items-center text-center gap-4"
+                            className="bg-neutral-100/50 dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800 p-12 rounded-4xl flex flex-col items-center text-center gap-4"
                         >
                             <div className="w-20 h-20 bg-neutral-200/50 rounded-full flex items-center justify-center mb-2">
                                 <Search className="w-10 h-10 text-neutral-400" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-black mb-1">No exercises found</h3>
+                                <h3 className="text-xl font-bold text-black dark:text-white mb-1">No exercises found</h3>
                                 <p className="text-neutral-500 font-medium">Try adjusting your filters or search term to widen your search.</p>
                             </div>
                             <button
@@ -195,7 +195,7 @@ const WorkoutLibraryPage = () => {
                                     setFilters({ search: '', muscleGroup: '', equipment: '', difficulty: '' });
                                     setSearchTerm('');
                                 }}
-                                className="px-6 py-2 bg-black text-white rounded-xl font-bold hover:bg-neutral-800 transition-colors"
+                                className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-bold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
                             >
                                 Clear All Filters
                             </button>
@@ -223,9 +223,9 @@ const WorkoutLibraryPage = () => {
 
             {/* Pagination */}
             {!isLoading && !error && exercises.length > 0 && (
-                <div className="flex items-center justify-between bg-white px-8 py-4 rounded-2xl border border-neutral-200 shadow-sm">
+                <div className="flex items-center justify-between bg-white dark:bg-neutral-900 px-8 py-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
                     <p className="text-neutral-500 font-medium">
-                        Showing <span className="text-black font-bold">{exercises.length}</span> of <span className="text-black font-bold">{pagination.total}</span> exercises
+                        Showing <span className="text-black dark:text-white font-bold">{exercises.length}</span> of <span className="text-black dark:text-white font-bold">{pagination.total}</span> exercises
                     </p>
                     <div className="flex items-center gap-2">
                         <button
@@ -252,7 +252,7 @@ const WorkoutLibraryPage = () => {
                                         onClick={() => handlePageChange(pageNum)}
                                         className={`w-10 h-10 rounded-xl font-bold transition-all ${pagination.page === pageNum
                                             ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-                                            : 'text-neutral-400 hover:text-black hover:bg-neutral-100'
+                                                : 'text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800'
                                             }`}
                                     >
                                         {pageNum}

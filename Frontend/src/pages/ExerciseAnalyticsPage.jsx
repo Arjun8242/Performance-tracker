@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -35,7 +35,7 @@ const MetricCard = ({ title, value, unit, trend, suffix, icon: Icon, delay = 0 }
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay }}
-        className="bg-white border border-neutral-100 p-8 rounded-[2.5rem] shadow-sm flex flex-col justify-between"
+        className="bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-8 rounded-[2.5rem] shadow-sm flex flex-col justify-between"
     >
         <div>
             <div className="w-12 h-12 bg-neutral-50 rounded-2xl flex items-center justify-center mb-6 text-neutral-400">
@@ -43,7 +43,7 @@ const MetricCard = ({ title, value, unit, trend, suffix, icon: Icon, delay = 0 }
             </div>
             <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">{title}</h3>
             <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-black">{value}</span>
+                <span className="text-4xl font-black text-black dark:text-white">{value}</span>
                 {unit && <span className="text-neutral-400 font-bold uppercase tracking-widest text-xs">{unit}</span>}
             </div>
         </div>
@@ -63,7 +63,7 @@ const MetricCard = ({ title, value, unit, trend, suffix, icon: Icon, delay = 0 }
 const SectionHeader = ({ title, subtitle, icon: Icon }) => (
     <div className="flex items-center justify-between mb-8">
         <div>
-            <h3 className="text-xl font-black text-black uppercase tracking-tight">{title} <span className="text-orange-500">{subtitle}</span></h3>
+            <h3 className="text-xl font-black text-black dark:text-white uppercase tracking-tight">{title} <span className="text-orange-500">{subtitle}</span></h3>
             <p className="text-neutral-400 text-[10px] font-black uppercase tracking-widest mt-1">Calculation based on verified logs</p>
         </div>
         {Icon && <Icon className="w-6 h-6 text-neutral-200" />}
@@ -77,19 +77,12 @@ const ExerciseAnalyticsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const authHeaders = useMemo(() => {
-        const token = localStorage.getItem('auth_token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    }, []);
-
     useEffect(() => {
         const fetchAnalytics = async () => {
             setIsLoading(true);
             setError(null);
             try {
-                const res = await axios.get(`${API_BASE_URL}/progress/exercise/${exerciseId}`, {
-                    headers: authHeaders
-                });
+                const res = await axios.get(`${API_BASE_URL}/progress/exercise/${exerciseId}`);
                 setAnalytics(res.data);
             } catch (err) {
                 console.error('Error fetching analytics:', err);
@@ -104,7 +97,7 @@ const ExerciseAnalyticsPage = () => {
         };
 
         fetchAnalytics();
-    }, [exerciseId, authHeaders]);
+    }, [exerciseId]);
 
     if (isLoading) {
         return (
@@ -112,10 +105,10 @@ const ExerciseAnalyticsPage = () => {
                 <div className="relative">
                     <Loader2 className="w-16 h-16 text-orange-500 animate-spin" strokeWidth={3} />
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <Activity className="w-6 h-6 text-black" />
+                        <Activity className="w-6 h-6 text-black dark:text-white" />
                     </div>
                 </div>
-                <p className="font-black text-black uppercase tracking-[0.2em] text-xs">Computing performance intelligence</p>
+                <p className="font-black text-black dark:text-white uppercase tracking-[0.2em] text-xs">Computing performance intelligence</p>
             </div>
         );
     }
@@ -126,7 +119,7 @@ const ExerciseAnalyticsPage = () => {
                 <div className="w-24 h-24 bg-orange-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
                     <Activity className="w-12 h-12 text-orange-500" />
                 </div>
-                <h2 className="text-4xl font-black text-black mb-4 uppercase tracking-tighter italic">
+                <h2 className="text-4xl font-black text-black dark:text-white mb-4 uppercase tracking-tighter italic">
                     Analytics <span className="text-orange-500">Locked</span>
                 </h2>
                 <p className="text-neutral-400 font-bold mb-10 text-lg leading-relaxed">
@@ -156,7 +149,7 @@ const ExerciseAnalyticsPage = () => {
                 <div>
                     <button
                         onClick={() => navigate(-1)}
-                        className="flex items-center gap-2 text-neutral-400 hover:text-black font-black text-[10px] uppercase tracking-widest mb-6 transition-colors group"
+                        className="flex items-center gap-2 text-neutral-400 hover:text-black dark:hover:text-white font-black text-[10px] uppercase tracking-widest mb-6 transition-colors group"
                     >
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         Back to Library
@@ -170,23 +163,23 @@ const ExerciseAnalyticsPage = () => {
                             <span className="text-[10px] font-black uppercase tracking-widest">Live Feed</span>
                         </div>
                     </div>
-                    <h1 className="text-6xl font-black text-black tracking-tighter uppercase leading-[0.9] italic">
+                    <h1 className="text-6xl font-black text-black dark:text-white tracking-tighter uppercase leading-[0.9] italic">
                         {exercise.name} <br />
                         <span className="text-orange-500 not-italic">Analytics</span>
                     </h1>
                 </div>
 
                 <div className="flex flex-wrap gap-4">
-                    <div className="bg-white border border-neutral-100 p-6 rounded-[2rem] shadow-sm flex flex-col justify-center min-w-[160px]">
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-6 rounded-4xl shadow-sm flex flex-col justify-center min-w-40">
                         <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Lifetime Volume</span>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-black text-black">{(stats.lifetimeVolume / 1000).toFixed(1)}k</span>
+                            <span className="text-3xl font-black text-black dark:text-white">{(stats.lifetimeVolume / 1000).toFixed(1)}k</span>
                             <span className="text-xs font-black text-neutral-300 uppercase">kg</span>
                         </div>
                     </div>
-                    <div className="bg-white border border-neutral-100 p-6 rounded-[2rem] shadow-sm flex flex-col justify-center min-w-[160px]">
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-6 rounded-4xl shadow-sm flex flex-col justify-center min-w-40">
                         <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Total Sessions</span>
-                        <span className="text-3xl font-black text-black">{stats.totalSessions}</span>
+                        <span className="text-3xl font-black text-black dark:text-white">{stats.totalSessions}</span>
                     </div>
                 </div>
             </div>
@@ -287,9 +280,9 @@ const ExerciseAnalyticsPage = () => {
                 </div>
 
                 {/* Strength Chart */}
-                <div className="xl:col-span-2 bg-white border border-neutral-100 p-10 rounded-[3.5rem] shadow-sm">
+                <div className="xl:col-span-2 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-10 rounded-[3.5rem] shadow-sm">
                     <SectionHeader title="Strength" subtitle="Progression" icon={TrendingUp} />
-                    <div className="h-[300px] w-full mt-6">
+                    <div className="h-75 w-full mt-6">
                         {strengthTrendData.length >= 3 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={strengthTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -341,9 +334,9 @@ const ExerciseAnalyticsPage = () => {
             {/* Bottom Section: Volume & PR History */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Volume Chart */}
-                <div className="bg-white border border-neutral-100 p-10 rounded-[3.5rem] shadow-sm">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-10 rounded-[3.5rem] shadow-sm">
                     <SectionHeader title="Volume" subtitle="Distribution" icon={Weight} />
-                    <div className="h-[300px] w-full mt-6">
+                    <div className="h-75 w-full mt-6">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={volumeTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
@@ -388,7 +381,7 @@ const ExerciseAnalyticsPage = () => {
                 </div>
 
                 {/* PR History Timeline */}
-                <div className="bg-white border border-neutral-100 p-10 rounded-[3.5rem] shadow-sm">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-10 rounded-[3.5rem] shadow-sm">
                     <SectionHeader title="Personal" subtitle="Records" icon={Trophy} />
                     <div className="mt-6 space-y-4">
                         {prHistory.length > 0 ? prHistory.map((pr, idx) => (
@@ -397,7 +390,7 @@ const ExerciseAnalyticsPage = () => {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 * idx }}
-                                className="flex items-center justify-between p-5 bg-neutral-50 rounded-3xl border border-neutral-100 group hover:border-orange-500 hover:bg-white transition-all"
+                                className="flex items-center justify-between p-5 bg-neutral-50 dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 group hover:border-orange-500 hover:bg-white dark:hover:bg-neutral-900 transition-all"
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-neutral-100 group-hover:bg-orange-50 transition-colors">
@@ -407,7 +400,7 @@ const ExerciseAnalyticsPage = () => {
                                         <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                                             {new Date(pr.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </p>
-                                        <p className="text-sm font-black text-black uppercase">
+                                        <p className="text-sm font-black text-black dark:text-white uppercase">
                                             {pr.weight}kg × {pr.reps} reps
                                         </p>
                                     </div>

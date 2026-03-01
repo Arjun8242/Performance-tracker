@@ -30,11 +30,11 @@ const WorkoutDayCard = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className={`bg-white rounded-[2.5rem] border shadow-sm overflow-hidden transition-all duration-300 ${readOnly ? 'border-neutral-200' : 'border-neutral-200 hover:border-orange-200 hover:shadow-xl'}`}
+            className={`bg-white dark:bg-neutral-900 rounded-[2.5rem] border shadow-sm overflow-hidden transition-all duration-300 ${readOnly ? 'border-neutral-200 dark:border-neutral-800' : 'border-neutral-200 dark:border-neutral-800 hover:border-orange-200 hover:shadow-xl'}`}
         >
             {/* Workout Header */}
-            <div className={`p-6 bg-neutral-50/50 border-b flex flex-wrap items-center gap-4 transition-colors ${errors.name ? 'border-red-100 bg-red-50/30' : 'border-neutral-100'}`}>
-                <div className="flex items-center gap-3 bg-white border border-neutral-200 rounded-xl px-4 py-2 shadow-sm">
+            <div className={`p-6 bg-neutral-50/50 dark:bg-neutral-800/50 border-b flex flex-wrap items-center gap-4 transition-colors ${errors.name ? 'border-red-100 bg-red-50/30' : 'border-neutral-100 dark:border-neutral-700'}`}>
+                <div className="flex items-center gap-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2 shadow-sm">
                     <select
                         value={workout.day}
                         disabled={readOnly}
@@ -45,14 +45,14 @@ const WorkoutDayCard = ({
                     </select>
                 </div>
 
-                <div className="flex-1 min-w-[200px] relative group">
+                <div className="flex-1 min-w-50 relative group">
                     <input
                         type="text"
                         value={workout.name}
                         disabled={readOnly}
                         onChange={(e) => onUpdateDay('name', e.target.value)}
                         placeholder="Workout Name (e.g., Push Day)"
-                        className={`w-full bg-transparent border-none focus:ring-0 text-xl font-bold text-black placeholder:text-neutral-300 transition-all ${readOnly ? 'cursor-default' : 'hover:translate-x-1'} ${errors.name ? 'text-red-600' : ''}`}
+                        className={`w-full bg-transparent border-none focus:ring-0 text-xl font-bold text-black dark:text-white placeholder:text-neutral-300 transition-all ${readOnly ? 'cursor-default' : 'hover:translate-x-1'} ${errors.name ? 'text-red-600' : ''}`}
                     />
                     {!readOnly && <div className={`absolute bottom-0 left-0 h-0.5 bg-orange-500 transition-all duration-300 ${workout.name ? 'w-full opacity-50' : 'w-0'}`} />}
                 </div>
