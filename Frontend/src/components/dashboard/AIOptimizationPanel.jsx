@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Sparkles, Brain, AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../api/axios';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const AIOptimizationPanel = ({ performance, onOptimize, userGoal = 'hypertrophy' }) => {
     const [isOptimizing, setIsOptimizing] = useState(false);
@@ -12,8 +12,8 @@ const AIOptimizationPanel = ({ performance, onOptimize, userGoal = 'hypertrophy'
         try {
             setIsOptimizing(true);
             setError(null);
-            const response = await axios.post(
-                `${API_BASE_URL}/ai/adjust-plan`,
+            const response = await api.post(
+                '/ai/adjust-plan',
                 { goal: userGoal || 'hypertrophy', strictMode: true }
             );
             onOptimize(response.data);

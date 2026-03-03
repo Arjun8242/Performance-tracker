@@ -120,7 +120,7 @@ export const callLLM = async ({
         ? { temperature: 0.1, maxOutputTokens: 2048 }
         : { temperature: 0.3, maxOutputTokens: 1024 };
 
-    const response = await withTimeout(
+    const response = await withTimeout(() =>
       genAI.models.generateContent({
         model: DEFAULT_MODEL,
         contents: prompt,

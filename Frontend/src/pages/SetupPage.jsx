@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronRight,
@@ -21,7 +21,7 @@ import male2 from '../assets/male2.jpg';
 import female1 from '../assets/female1.jpg';
 import female2 from '../assets/female2.jpg';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const AVATARS = [
     { id: 'male_1', gender: 'male', src: male1, label: 'Toji' },
@@ -43,7 +43,7 @@ const SetupPage = () => {
     useEffect(() => {
         const checkSetup = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/users/profile`);
+                const res = await api.get('/users/profile');
 
                 // If avatar and nutrition are already set, no need to be here
                 if (res.data.avatar && res.data.nutritionProfile) {
@@ -69,10 +69,10 @@ const SetupPage = () => {
         setIsLoading(true);
         try {
             // 1. Update Avatar
-            await axios.put(`${API_BASE_URL}/users/avatar`, { avatar: selectedAvatar });
+            await api.put('/users/avatar', { avatar: selectedAvatar });
 
             // 2. Update Nutrition
-            await axios.put(`${API_BASE_URL}/users/nutrition`, { nutritionProfile: nutrition });
+            await api.put('/users/nutrition', { nutritionProfile: nutrition });
 
             // 3. Success -> Dashboard
             navigate('/dashboard');

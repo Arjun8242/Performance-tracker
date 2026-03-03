@@ -26,30 +26,39 @@ class ErrorBoundary extends React.Component {
     render() {
         if (this.state.hasError) {
             return (
-                <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-8">
-                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-12 max-w-md w-full text-center shadow-lg">
-                        <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <AlertTriangle className="w-8 h-8 text-red-500" />
+                <div className="min-h-screen bg-neutral-50 dark:bg-black flex items-center justify-center p-6">
+                    <div className="max-w-md w-full bg-white dark:bg-neutral-900 rounded-[3rem] p-10 border border-neutral-200 dark:border-neutral-800 shadow-2xl text-center space-y-8">
+                        <div className="w-20 h-20 bg-red-50 dark:bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto">
+                            <AlertTriangle className="w-10 h-10 text-red-500" />
                         </div>
-                        <h2 className="text-2xl font-black text-black dark:text-white uppercase tracking-tight mb-2">
-                            Something Went Wrong
-                        </h2>
-                        <p className="text-neutral-500 text-sm mb-8">
-                            An unexpected error occurred. Try refreshing the page.
-                        </p>
-                        <div className="flex gap-3 justify-center">
+
+                        <div className="space-y-3">
+                            <h1 className="text-3xl font-black text-black dark:text-white uppercase tracking-tight">System Crash</h1>
+                            <p className="text-neutral-500 font-medium italic">
+                                "Mental resilience is the first step to physical dominance."
+                            </p>
+                            <p className="text-neutral-400 text-sm">
+                                An unexpected error occurred in the training module.
+                            </p>
+                        </div>
+
+                        <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-700">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Error Signature</p>
+                            <p className="text-xs font-mono text-red-500 break-all">{this.state.error?.message || 'Unknown Error'}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
                             <button
-                                onClick={this.handleReset}
-                                className="flex items-center gap-2 px-6 py-3 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition-colors"
+                                onClick={() => window.location.reload()}
+                                className="flex items-center justify-center gap-2 py-4 bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-neutral-200 transition-colors"
                             >
-                                <RefreshCw className="w-4 h-4" />
-                                Try Again
+                                <RefreshCw className="w-4 h-4" /> Reload
                             </button>
                             <button
                                 onClick={() => window.location.href = '/'}
-                                className="px-6 py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-bold rounded-2xl hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                                className="flex items-center justify-center gap-2 py-4 bg-black text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-orange-500 transition-colors shadow-lg shadow-black/10"
                             >
-                                Go Home
+                                Dashboard
                             </button>
                         </div>
                     </div>

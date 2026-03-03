@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { Dumbbell, ClipboardList, TrendingUp, Library, Zap, Target, Activity } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ProgressOverview from '../components/dashboard/ProgressOverview';
@@ -9,7 +9,7 @@ import AIPerformanceCard from '../components/dashboard/AIPerformanceCard';
 import AIOptimizationPanel from '../components/dashboard/AIOptimizationPanel';
 import AdjustmentPreview from '../components/dashboard/AdjustmentPreview';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 /**
  * Dashboard Component
@@ -54,16 +54,16 @@ const DashboardPage = () => {
             };
 
             const [summaryRes, streakRes, logsRes, aiContextRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/progress/summary`),
-                axios.get(`${API_BASE_URL}/progress/streak`),
-                axios.get(`${API_BASE_URL}/workouts/logs`, {
+                api.get('/progress/summary'),
+                api.get('/progress/streak'),
+                api.get('/workouts/logs', {
                     params: {
                         from: formatDate(firstDay),
                         to: formatDate(lastDay),
                         limit: 100
                     }
                 }),
-                axios.get(`${API_BASE_URL}/ai/context`),
+                api.get('/ai/context'),
             ]);
 
             setSummary(summaryRes.data);
@@ -86,7 +86,7 @@ const DashboardPage = () => {
     const fetchHeatmap = useCallback(async (date) => {
         try {
             setIsLoadingHeatmap(true);
-            const res = await axios.get(`${API_BASE_URL}/progress/month`, {
+            const res = await api.get('/progress/month', {
                 params: { month: date.getMonth(), year: date.getFullYear() }
             });
             setHeatmapData(res.data);

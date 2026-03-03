@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { motion } from 'framer-motion';
 import {
     User,
@@ -23,7 +23,7 @@ import male2 from '../assets/male2.jpg';
 import female1 from '../assets/female1.jpg';
 import female2 from '../assets/female2.jpg';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const AVATARS = [
     { id: 'male_1', src: male1, label: 'Toji' },
@@ -45,7 +45,7 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/users/profile`);
+                const res = await api.get('/users/profile');
                 setUser(res.data);
                 if (res.data.nutritionProfile) {
                     setNutrition(res.data.nutritionProfile);
@@ -64,7 +64,7 @@ const ProfilePage = () => {
         e.preventDefault();
         setIsSaving(true);
         try {
-            await axios.put(`${API_BASE_URL}/users/nutrition`, { nutritionProfile: nutrition });
+            await api.put('/users/nutrition', { nutritionProfile: nutrition });
             setSuccessMessage('Nutrition targets updated!');
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error) {
@@ -77,7 +77,7 @@ const ProfilePage = () => {
     const handleUpdateAvatar = async (avatarId) => {
         setIsSaving(true);
         try {
-            await axios.put(`${API_BASE_URL}/users/avatar`, { avatar: avatarId });
+            await api.put('/users/avatar', { avatar: avatarId });
             setUser(prev => ({ ...prev, avatar: avatarId }));
             setSuccessMessage('Avatar updated!');
             setTimeout(() => setSuccessMessage(''), 3000);
@@ -95,7 +95,7 @@ const ProfilePage = () => {
         setUser(prev => ({ ...prev, theme: newTheme }));
 
         try {
-            await axios.put(`${API_BASE_URL}/users/theme`, { theme: newTheme });
+            await api.put('/users/theme', { theme: newTheme });
         } catch (error) {
             console.error('Failed to update theme on server:', error);
         }

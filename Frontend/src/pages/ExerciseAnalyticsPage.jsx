@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import {
     LineChart,
     Line,
@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const MetricCard = ({ title, value, unit, trend, suffix, icon: Icon, delay = 0 }) => (
     <motion.div
@@ -82,7 +82,7 @@ const ExerciseAnalyticsPage = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const res = await axios.get(`${API_BASE_URL}/progress/exercise/${exerciseId}`);
+                const res = await api.get(`/progress/exercise/${exerciseId}`);
                 setAnalytics(res.data);
             } catch (err) {
                 console.error('Error fetching analytics:', err);

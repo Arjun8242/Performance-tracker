@@ -4,9 +4,9 @@ import {
     ClipboardList, Plus, Trash2, Save, Loader2,
     Dumbbell, ChevronDown, X, Notebook
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../api/axios';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const WorkoutForm = ({
     state,
@@ -111,7 +111,7 @@ const WorkoutForm = ({
                 notes
             };
 
-            await axios.post(`${API_BASE_URL}/workouts/log`, payload);
+            await api.post('/workouts/log', payload);
             dispatch({ type: 'SET_MESSAGE', payload: { type: 'success', text: 'Workout logged successfully!' } });
             onSuccess();
             setTimeout(() => dispatch({ type: 'SET_MESSAGE', payload: { type: '', text: '' } }), 5000);

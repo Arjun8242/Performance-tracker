@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Mail, Lock, User, Loader2, ArrowRight, Activity,
-    Target, Zap, ChevronRight, Eye, EyeOff, ClipboardList, Smile, Cpu,
-    Dumbbell, Trophy, Flame, ShieldCheck
+    Loader2, ShieldCheck, Dumbbell, User, Mail,
+    Lock, EyeOff, Eye, ChevronRight, Flame,
+    Activity, Trophy
 } from 'lucide-react';
-
-import { useAuth } from '../../context/AuthContext';
-
-const API_BASE_URL = 'http://localhost:3000';
 
 const AuthPage = () => {
     const location = useLocation();
@@ -80,7 +77,7 @@ const AuthPage = () => {
         setError('');
         setSuccessMsg('');
         try {
-            await axios.post(`${API_BASE_URL}/auth/resend-otp`, { email: formData.email }, { withCredentials: true });
+            await api.post('/auth/resend-otp', { email: formData.email });
             setSuccessMsg('A new OTP has been sent to your email.');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to resend OTP.');
@@ -104,7 +101,7 @@ const AuthPage = () => {
                     throw new Error('Password must be at least 8 characters long');
                 }
 
-                const res = await axios.post(`${API_BASE_URL}/auth/register`, formData, { withCredentials: true });
+                const res = await api.post('/auth/register', formData);
                 setSuccessMsg(res.data?.message || 'Check your email for the OTP.');
                 setIsVerifying(true);
             }

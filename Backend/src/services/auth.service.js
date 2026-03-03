@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import { generateToken } from '../utils/token.js';
@@ -8,7 +9,8 @@ import logger from '../utils/logger.js';
 
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-const generate6DigitOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
+// Cryptographically secure 6-digit OTP
+const generate6DigitOtp = () => crypto.randomInt(0, 1000000).toString().padStart(6, '0');
 
 /**
  * Register a new user or update an unverified user's OTP

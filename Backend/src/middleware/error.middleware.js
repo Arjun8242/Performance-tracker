@@ -11,28 +11,26 @@ const errorConverter = (err, req, res, next) => {
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e) => ({
         field: e.path,
-        message: e.message
+        message: e.message,
       }));
       const message = "Configuration or validation failed";
-      error = new ApiError(httpStatus.BAD_REQUEST, message, errors, false);
+      error = new ApiError(httpStatus.BAD_REQUEST, message, errors, false, 'VALIDATION_ERROR');
     }
     // Handle Mongoose duplicate key errors
     else if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0];
+      const field = Object.keys(error.keyPattern || {})[0] || 'field';
       const message = `${field} already exists`;
-      error = new ApiError(httpStatus.CONFLICT, message, [], false);
+      error = new ApiError(httpStatus.CONFLICT, message, [], false, 'DUPLICATE_KEY');
     }
     // Handle Mongoose cast errors (invalid ObjectId)
     else if (error.name === 'CastError') {
       const message = `Invalid ${error.path}: ${error.value}`;
-      error = new ApiError(httpStatus.BAD_REQUEST, message, [], false);
+      error = new ApiError(httpStatus.BAD_REQUEST, message, [], false, 'INVALID_ID');
     }
     // Generic error
     else {
-      const statusCode =
-        error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
-      const message =
-        error.message || httpStatus[statusCode];
+      const statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+      const message = error.message || httpStatus[statusCode];
 
       error = new ApiError(statusCode, message, [], false);
     }
@@ -49,19 +47,21 @@ const globalErrorHandler = (err, req, res, next) => {
 
   logger.error(err);
 
+  const errorCode = err.code || (httpStatus[statusCode] || 'INTERNAL_SERVER_ERROR').toString().toUpperCase().replace(/\s+/g, '_');
+
   const response = {
-    statusCode,
+    success: false,
     message,
+    errorCode,
     ...(err.errors && err.errors.length > 0 && { errors: err.errors }),
-    // Only include stack trace in development mode
-    ...(config.env === "development" && { stack: err.stack }),
+    ...(config.env === "development" && { stack: err.stack, statusCode }),
   };
 
   res.status(statusCode).json(response);
 };
 
 const notFound = (req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, "Not Found"));
+  next(new ApiError(httpStatus.NOT_FOUND, "Not Found", [], true, 'NOT_FOUND'));
 };
 
 export { notFound, errorConverter, globalErrorHandler };

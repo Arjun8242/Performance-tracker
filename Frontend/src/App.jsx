@@ -14,39 +14,39 @@ import SetupPage from './pages/SetupPage';
 import ProfilePage from './pages/ProfilePage';
 import AuthenticatedAppLayout from './components/layout/AuthenticatedAppLayout';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage';
 
 function App() {
   return (
     <ErrorBoundary>
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/register" element={<AuthPage />} />
-        <Route path="/login" element={<AuthPage />} />
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/register" element={<AuthPage />} />
+          <Route path="/login" element={<AuthPage />} />
 
-        {/* Authenticated Layout Wrapper */}
-        <Route element={<ProtectedRoute><AuthenticatedAppLayout /></ProtectedRoute>}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/workout-plans" element={<WorkoutPlanPage />} />
-          <Route path="/workout-library" element={<WorkoutLibraryPage />} />
-          <Route path="/plan-builder" element={<PlanBuilderPage />} />
-          <Route path="/workout-logging" element={<WorkoutLoggingPage />} />
-          <Route path="/progress" element={<ProgressPage />} />
-          <Route path="/exercise/:exerciseId" element={<ExerciseAnalyticsPage />} />
-          <Route path="/exercises" element={<ExercisesPage />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-        </Route>
+          {/* Authenticated Layout Wrapper */}
+          <Route element={<ProtectedRoute><AuthenticatedAppLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/workout-plans" element={<WorkoutPlanPage />} />
+            <Route path="/workout-library" element={<WorkoutLibraryPage />} />
+            <Route path="/plan-builder" element={<PlanBuilderPage />} />
+            <Route path="/workout-logging" element={<WorkoutLoggingPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/exercise/:exerciseId" element={<ExerciseAnalyticsPage />} />
+            <Route path="/exercises" element={<ExercisesPage />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Route>
 
-        <Route path="/setup" element={<ProtectedRoute><SetupPage /></ProtectedRoute>} />
+          <Route path="/setup" element={<ProtectedRoute><SetupPage /></ProtectedRoute>} />
 
-        {/* Fallback to Home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          {/* Fallback to Home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
     </ErrorBoundary>
   );
 }

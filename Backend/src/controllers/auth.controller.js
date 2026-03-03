@@ -1,10 +1,11 @@
 import httpStatus from 'http-status';
 import authService from '../services/auth.service.js';
+import config from '../config/env.js';
 
 const COOKIE_OPTS = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Lax', // Changed to Lax for local development/cross-port support
+    secure: config.env === 'production',
+    sameSite: 'Lax', // For cross-port SPA on same-site. Use 'None' with secure=true for cross-site.
     path: '/',
 };
 
@@ -21,7 +22,8 @@ export const verify = async (req, res, next) => {
     try {
         const { email, otp } = req.body;
         const { user, token } = await authService.verifyOTP(email, otp);
-        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 days
+        // Align cookie lifetime with JWT access token lifetime
+        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: config.jwt.accessExpirationMinutes * 60 * 1000 });
         res.status(httpStatus.OK).send({ message: 'Verified and logged in', user, token });
     } catch (err) {
         next(err);
@@ -43,7 +45,7 @@ export const login = async (req, res, next) => {
         const { email, password } = req.body;
         const { user, token } = await authService.login(email, password);
 
-        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 7 days
+        res.cookie('access_token', token, { ...COOKIE_OPTS, maxAge: config.jwt.accessExpirationMinutes * 60 * 1000 });
         res.status(httpStatus.OK).send({ message: 'Logged in', user, token });
     } catch (err) {
         next(err);

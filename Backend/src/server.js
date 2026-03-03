@@ -2,6 +2,7 @@ import app from "../src/app.js";
 import config from "../src/config/env.js";
 import logger from "../src/utils/logger.js";
 import connectDB from "../src/config/db.js";
+import mongoose from "mongoose";
 
 let server;
 
@@ -29,14 +30,29 @@ const shutdown = (signal, error) => {
     logger.error(error);
   }
 
-  if (server) {
-    server.close(() => {
-      logger.info("HTTP server closed");
+  const closeHttpServer = () => {
+    if (server) {
+      server.close(() => {
+        logger.info("HTTP server closed");
+        closeDatabase();
+      });
+    } else {
+      closeDatabase();
+    }
+  };
+
+  const closeDatabase = () => {
+    if (mongoose.connection.readyState !== 0) {
+      mongoose.connection.close(false, () => {
+        logger.info("MongoDB connection closed");
+        process.exit(0);
+      });
+    } else {
       process.exit(0);
-    });
-  } else {
-    process.exit(0);
-  }
+    }
+  };
+
+  closeHttpServer();
 };
 
 process.on("uncaughtException", (err) => shutdown("uncaughtException", err));

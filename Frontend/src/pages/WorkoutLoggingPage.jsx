@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useReducer } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     History, Plus, CheckCircle2, AlertCircle, X, Loader2
@@ -9,7 +9,7 @@ import WorkoutForm from '../components/workout/WorkoutForm';
 import WorkoutHistory from '../components/workout/WorkoutHistory';
 import ExerciseSearchModal from '../components/workout/ExerciseSearchModal';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const getLocalDateString = (date = new Date()) => {
     const year = date.getFullYear();
@@ -117,7 +117,7 @@ const WorkoutLoggingPage = () => {
 
     const fetchActivePlan = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/workouts/plan`);
+            const res = await api.get('/workouts/plan');
             dispatch({ type: 'SET_ACTIVE_PLAN', payload: res.data });
         } catch (err) {
             console.error('Error fetching active plan:', err);
@@ -133,7 +133,7 @@ const WorkoutLoggingPage = () => {
                 from: state.filters.from || undefined,
                 to: state.filters.to || undefined
             };
-            const res = await axios.get(`${API_BASE_URL}/workouts/logs`, {
+            const res = await api.get('/workouts/logs', {
                 params
             });
             dispatch({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,7 +14,7 @@ import PlanBuilderSaveBar from '../components/workout/PlanBuilderSaveBar';
 import ErrorMessage from '../components/common/ErrorMessage';
 import ExerciseSearchModal from '../components/workout/ExerciseSearchModal';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const WorkoutPlanPage = () => {
     const [plan, setPlan] = useState(null);
@@ -33,7 +33,7 @@ const WorkoutPlanPage = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await axios.get(`${API_BASE_URL}/workouts/plan`);
+            const res = await api.get('/workouts/plan');
             if (res.data) {
                 setPlan(res.data);
                 setOriginalPlan(JSON.parse(JSON.stringify(res.data)));
@@ -212,7 +212,7 @@ const WorkoutPlanPage = () => {
                 }))
             };
 
-            await axios.put(`${API_BASE_URL}/workouts/plan`, payload);
+            await api.put('/workouts/plan', payload);
 
             setOriginalPlan(JSON.parse(JSON.stringify(plan)));
             setIsEditing(false);
@@ -235,7 +235,7 @@ const WorkoutPlanPage = () => {
         if (!window.confirm('Delete entire workout plan?')) return;
         setIsSaving(true);
         try {
-            await axios.delete(`${API_BASE_URL}/workouts/plan`);
+            await api.delete('/workouts/plan');
             setPlan(null);
             setOriginalPlan(null);
             setIsEditing(false);

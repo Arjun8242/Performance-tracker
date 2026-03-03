@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -21,7 +21,7 @@ import {
 import LibraryBadge from '../components/library/LibraryBadge';
 import ExerciseCard from '../components/library/ExerciseCard';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 
 import LibraryFilters from '../components/library/LibraryFilters';
@@ -76,7 +76,7 @@ const WorkoutLibraryPage = () => {
                 if (params[key] === '') delete params[key];
             });
 
-            const response = await axios.get(`${API_BASE_URL}/exercises`, { params });
+            const response = await api.get('/exercises', { params });
             setExercises(response.data.exercises);
             setPagination(prev => ({
                 ...prev,
@@ -252,7 +252,7 @@ const WorkoutLibraryPage = () => {
                                         onClick={() => handlePageChange(pageNum)}
                                         className={`w-10 h-10 rounded-xl font-bold transition-all ${pagination.page === pageNum
                                             ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-                                                : 'text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                            : 'text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800'
                                             }`}
                                     >
                                         {pageNum}

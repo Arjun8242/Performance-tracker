@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import {
     Zap,
     TrendingUp,
@@ -12,7 +12,7 @@ import {
     Clock
 } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const AIPerformanceCard = () => {
     const [analysis, setAnalysis] = useState(null);
@@ -64,7 +64,7 @@ const AIPerformanceCard = () => {
 
             setError(null);
 
-            const res = await axios.post(`${API_BASE_URL}/ai/analyze`, {});
+            const res = await api.post('/ai/analyze', {});
             setAnalysis(res.data);
             setLastAnalysisAt(res.data.lastAnalysisAt);
             setIsCached(res.data.cached || false);
@@ -80,7 +80,7 @@ const AIPerformanceCard = () => {
             if (err.response?.status === 429) {
                 // If rate limited, try to just get the context (raw data) to show something
                 try {
-                    const contextRes = await axios.get(`${API_BASE_URL}/ai/context`);
+                    const contextRes = await api.get('/ai/context');
                     setAnalysis({ context: contextRes.data, isRateLimited: true });
                 } catch {
                     setError("Unable to load performance data.");

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { AnimatePresence } from 'framer-motion';
 
 import PlanBuilderHeader from '../components/workout/PlanBuilderHeader';
@@ -10,7 +10,7 @@ import WorkoutDayCard from '../components/workout/WorkoutDayCard';
 import PlanBuilderEmptyState from '../components/workout/PlanBuilderEmptyState';
 import ExerciseSearchModal from '../components/workout/ExerciseSearchModal';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const PlanBuilderPage = () => {
     const location = useLocation();
@@ -162,7 +162,7 @@ const PlanBuilderPage = () => {
                 }))
             };
 
-            await axios.post(`${API_BASE_URL}/workouts/plan`, payload);
+            await api.post('/workouts/plan', payload);
 
             navigate('/dashboard');
         } catch (err) {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { TrendingUp, Trophy, Dumbbell, BarChart2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const ProgressPage = () => {
     const navigate = useNavigate();
@@ -33,7 +33,7 @@ const ProgressPage = () => {
             let totalPages = 1;
 
             while (page <= totalPages) {
-                const res = await axios.get(`${API_BASE_URL}/workouts/logs`, {
+                const res = await api.get('/workouts/logs', {
                     params: { from, to, page, limit: 100 }
                 });
 

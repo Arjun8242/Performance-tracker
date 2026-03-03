@@ -30,6 +30,7 @@
     "nodemailer": "^8.0.1",
     "nodemon": "^3.1.11",
     "winston": "^3.19.0",
-    "xss-clean": "^0.1.4"
+    "xss-clean": "^0.1.4",
+    "hpp": "^0.2.3"
   }
 }

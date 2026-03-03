@@ -1,4 +1,4 @@
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+import rateLimit from 'express-rate-limit';
 
 /**
  * Rate Limiting Middleware
@@ -43,10 +43,10 @@ const authLimiter = rateLimit({
  */
 const aiAnalysisLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 5,
+    max: 10,
     message: {
         success: false,
-        message: 'You have reached your AI analysis limit for today (5 per 24h). Try again tomorrow!',
+        message: 'You have reached your AI analysis limit for today (10 per 24h). Try again tomorrow!',
     },
     standardHeaders: true,
     legacyHeaders: false,

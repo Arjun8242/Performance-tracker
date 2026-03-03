@@ -1,42 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import api from '../api/axios';
 
 const AuthContext = createContext();
-
-const API_BASE_URL = 'http://localhost:3000';
-axios.defaults.withCredentials = true;
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
-    const interceptorId = useRef(null);
-
-    // Setup 401 interceptor — auto-logout on expired/invalid session
-    useEffect(() => {
-        interceptorId.current = axios.interceptors.response.use(
-            (response) => response,
-            (error) => {
-                if (error.response?.status === 401 && isAuthenticated) {
-                    console.warn('[Auth] Session expired — logging out');
-                    setUser(null);
-                    setIsAuthenticated(false);
-                }
-                return Promise.reject(error);
-            }
-        );
-        return () => {
-            if (interceptorId.current !== null) {
-                axios.interceptors.response.eject(interceptorId.current);
-            }
-        };
-    }, [isAuthenticated]);
 
     const checkAuthStatus = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/users/profile`, {
-                withCredentials: true
-            });
+            const res = await api.get('/users/profile');
             setUser(res.data);
             setIsAuthenticated(true);
         } catch {
@@ -51,10 +25,23 @@ export const AuthProvider = ({ children }) => {
         checkAuthStatus();
     }, [checkAuthStatus]);
 
+    // Setup 401 interceptor for automatic logout
+    useEffect(() => {
+        const interceptor = api.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response?.status === 401 && isAuthenticated) {
+                    setUser(null);
+                    setIsAuthenticated(false);
+                }
+                return Promise.reject(error);
+            }
+        );
+        return () => api.interceptors.response.eject(interceptor);
+    }, [isAuthenticated]);
+
     const login = async (email, password) => {
-        const res = await axios.post(`${API_BASE_URL}/auth/login`, { email, password }, {
-            withCredentials: true
-        });
+        const res = await api.post('/auth/login', { email, password });
         if (res.data?.user) {
             setUser(res.data.user);
             setIsAuthenticated(true);
@@ -63,9 +50,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const verify = async (email, otp) => {
-        const res = await axios.post(`${API_BASE_URL}/auth/verify`, { email, otp }, {
-            withCredentials: true
-        });
+        const res = await api.post('/auth/verify', { email, otp });
         if (res.data?.user) {
             setUser(res.data.user);
             setIsAuthenticated(true);
@@ -75,7 +60,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
+            await api.post('/auth/logout', {});
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
@@ -88,12 +73,9 @@ export const AuthProvider = ({ children }) => {
         const previousTheme = user?.theme;
         setUser(prev => ({ ...prev, theme: newTheme }));
         try {
-            await axios.put(`${API_BASE_URL}/users/theme`, { theme: newTheme }, {
-                withCredentials: true
-            });
+            await api.put('/users/theme', { theme: newTheme });
         } catch (error) {
             console.error('Failed to update theme:', error);
-            // Rollback on failure
             setUser(prev => ({ ...prev, theme: previousTheme }));
         }
     };

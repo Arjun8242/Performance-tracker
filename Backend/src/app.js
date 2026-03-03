@@ -2,6 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
+import config from './config/env.js';
 import healthRoute from './routes/health.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import workoutRoutes from './routes/workout.routes.js';
@@ -17,21 +18,47 @@ import { generalLimiter } from './middleware/rateLimiter.middleware.js';
 
 const app = express();
 
+// Trust proxy (needed for secure cookies & rate limiting behind load balancers)
+app.set('trust proxy', 1);
+
+// Remove X-Powered-By header
+app.disable('x-powered-by');
+
 // Set security HTTP headers
 app.use(helmet());
 
 // Enable CORS with credentials support
-const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
-app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+const devOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+const allowedOrigins = config.env === 'production'
+    ? [config.cors.frontendUrl]
+    : [...devOrigins, config.cors.frontendUrl];
+
+const corsOptions = {
+    origin(origin, callback) {
+        // Allow non-browser tools (no Origin header) in non-production
+        if (!origin && config.env !== 'production') {
+            return callback(null, true);
         }
+
+        if (origin && allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
-}));
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+    ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+};
+
+app.use(cors(corsOptions));
+app.options('/{*path}', cors(corsOptions));
 
 // parse json request body
 app.use(express.json());

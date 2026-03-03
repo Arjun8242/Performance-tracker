@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Dumbbell, Loader2, Info, Plus } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -17,7 +17,7 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
         }
         setIsSearching(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/exercises`, {
+            const res = await api.get('/exercises', {
                 params: { search: query, limit: 10 }
             });
             setSearchResults(res.data.exercises || []);

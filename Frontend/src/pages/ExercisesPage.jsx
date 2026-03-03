@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import {
     Dumbbell,
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 const ExercisesPage = () => {
     const navigate = useNavigate();
@@ -31,7 +31,7 @@ const ExercisesPage = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const res = await axios.get(`${API_BASE_URL}/progress/exercises`);
+                const res = await api.get('/progress/exercises');
                 setExercises(res.data);
             } catch (err) {
                 console.error('Error fetching performed exercises:', err);

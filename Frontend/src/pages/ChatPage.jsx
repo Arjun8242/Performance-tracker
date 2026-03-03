@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import {
     Send,
     Trash2,
@@ -13,7 +13,7 @@ import {
     Shield
 } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:3000';
+
 
 
 // Quick suggestion chips to lower friction
@@ -40,7 +40,7 @@ const ChatPage = () => {
         const loadHistory = async () => {
             try {
                 setIsLoadingHistory(true);
-                const res = await axios.get(`${API_BASE_URL}/ai/chat`);
+                const res = await api.get('/ai/chat');
                 setMessages(res.data.messages || []);
             } catch (err) {
                 console.error('Failed to load chat history:', err);
@@ -67,8 +67,8 @@ const ChatPage = () => {
         setIsLoading(true);
 
         try {
-            const res = await axios.post(
-                `${API_BASE_URL}/ai/chat`,
+            const res = await api.post(
+                '/ai/chat',
                 { message: messageText }
             );
             setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
@@ -93,7 +93,7 @@ const ChatPage = () => {
         if (!window.confirm('Clear all chat history?')) return;
         try {
             setIsClearing(true);
-            await axios.delete(`${API_BASE_URL}/ai/chat`);
+            await api.delete('/ai/chat');
             setMessages([]);
         } catch (err) {
             console.error('Failed to clear chat:', err);
