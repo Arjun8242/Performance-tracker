@@ -8,17 +8,18 @@ export const updateAvatar = catchAsync(async (req, res) => {
         req.user._id,
         { avatar },
         { new: true, runValidators: true }
-    ).select('-password -tokens');
-    res.send(user);
+    ).select('-password -otpHash');
+    res.json(user.toJSON());
 });
+
 export const updateTheme = catchAsync(async (req, res) => {
     const { theme } = req.body;
     const user = await User.findByIdAndUpdate(
         req.user._id,
         { theme },
         { new: true, runValidators: true }
-    );
-    res.send(user);
+    ).select('-password -otpHash');
+    res.json(user.toJSON());
 });
 
 export const updateNutrition = catchAsync(async (req, res) => {
@@ -27,12 +28,17 @@ export const updateNutrition = catchAsync(async (req, res) => {
         req.user._id,
         { nutritionProfile },
         { new: true, runValidators: true }
-    );
-    res.send(user);
+    ).select('-password -otpHash');
+    res.json(user.toJSON());
 });
 
 export const getProfile = catchAsync(async (req, res) => {
-    res.send(req.user);
+    // Re-fetch to ensure sensitive fields are excluded
+    const user = await User.findById(req.user._id).select('-password -otpHash');
+    if (!user) {
+        throw new ApiError(404, 'User not found');
+    }
+    res.json(user.toJSON());
 });
 
 export default {

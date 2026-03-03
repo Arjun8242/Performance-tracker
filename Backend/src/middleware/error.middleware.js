@@ -45,7 +45,7 @@ const globalErrorHandler = (err, req, res, next) => {
 
   res.locals.errorMessage = message;
 
-  logger.error(err);
+  logger.error(err.message || 'Unknown error', { stack: err.stack, statusCode });
 
   const errorCode = err.code || (httpStatus[statusCode] || 'INTERNAL_SERVER_ERROR').toString().toUpperCase().replace(/\s+/g, '_');
 
