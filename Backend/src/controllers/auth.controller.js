@@ -5,7 +5,7 @@ import config from '../config/env.js';
 const COOKIE_OPTS = {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: 'Lax', // For cross-port SPA on same-site. Use 'None' with secure=true for cross-site.
+    sameSite: config.env === 'production' ? 'None' : 'Lax',
     path: '/',
 };
 
