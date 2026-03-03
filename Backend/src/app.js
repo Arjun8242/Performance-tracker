@@ -3,7 +3,6 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 import config from './config/env.js';
-import healthRoute from './routes/health.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import workoutRoutes from './routes/workout.routes.js';
 import workoutLogRoutes from './routes/workoutLog.routes.js';
@@ -94,7 +93,9 @@ app.use(generalLimiter);
 app.use(successHandler);
 app.use(errorHandler);
 
-app.use('/api', healthRoute);
+app.get('/', (req, res) => res.status(200).json({ status: 'ok' }));
+app.head('/', (req, res) => res.sendStatus(200));
+
 app.use('/auth', authRoutes);
 app.use('/workouts', workoutRoutes);
 app.use('/workouts', workoutLogRoutes);
