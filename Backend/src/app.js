@@ -29,21 +29,36 @@ app.use(helmet());
 
 // Enable CORS with credentials support
 const devOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
+// Normalize: strip trailing slashes from frontend URL
+const normalizedFrontendUrl = (config.cors.frontendUrl || '').replace(/\/+$/, '');
+
 const allowedOrigins = config.env === 'production'
-    ? [config.cors.frontendUrl]
-    : [...devOrigins, config.cors.frontendUrl];
+    ? [normalizedFrontendUrl]
+    : [...devOrigins, normalizedFrontendUrl];
+
+console.log('[CORS] Allowed origins:', allowedOrigins);
 
 const corsOptions = {
     origin(origin, callback) {
-        // Allow non-browser tools (no Origin header) in non-production
-        if (!origin && config.env !== 'production') {
+        // Allow requests with no Origin header (health checks, server-to-server, curl, etc.)
+        if (!origin) {
             return callback(null, true);
         }
 
-        if (origin && allowedOrigins.includes(origin)) {
+        // Normalize incoming origin (strip trailing slash)
+        const normalizedOrigin = origin.replace(/\/+$/, '');
+
+        if (allowedOrigins.includes(normalizedOrigin)) {
             return callback(null, true);
         }
 
+        // Also allow Vercel preview/deployment URLs for the same project
+        if (normalizedOrigin.endsWith('.vercel.app') && normalizedOrigin.includes('performance-tracker')) {
+            return callback(null, true);
+        }
+
+        console.error(`[CORS] Blocked origin: ${origin}`);
         return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,

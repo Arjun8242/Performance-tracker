@@ -6,14 +6,23 @@ const EMAIL_PASS = process.env.GMAIL_APP_PASSWORD;
 let transporter = null;
 if (EMAIL_USER && EMAIL_PASS) {
   transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: {
       user: EMAIL_USER,
       pass: EMAIL_PASS,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    logger: process.env.NODE_ENV === 'production',
+    debug: process.env.NODE_ENV === 'production',
   });
+  console.log(`[Email] Transporter configured for ${EMAIL_USER}`);
 } else {
-  console.warn('EMAIL_USER or EMAIL_PASS not set — OTP emails will be logged to console');
+  console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — OTP emails will be logged to console');
 }
 
 export const sendOtpEmail = async ({ to, otp }) => {
