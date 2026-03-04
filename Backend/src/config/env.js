@@ -14,8 +14,7 @@ const baseRequiredEnvVars = [
 const isProduction = process.env.NODE_ENV === 'production';
 const prodRequiredEnvVars = [
   'FRONTEND_URL',
-  'GMAIL_EMAIL',
-  'GMAIL_APP_PASSWORD',
+  'RESEND_API_KEY',
 ];
 
 const requiredEnvVars = isProduction
@@ -54,8 +53,7 @@ const config = {
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   },
   email: {
-    user: process.env.GMAIL_EMAIL,
-    password: process.env.GMAIL_APP_PASSWORD,
+    resendApiKey: process.env.RESEND_API_KEY,
   },
   gemini: {
     apiKey: process.env.GEMINI_API_KEY,
