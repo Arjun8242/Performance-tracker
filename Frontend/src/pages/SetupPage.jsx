@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronRight,
@@ -32,6 +33,7 @@ const AVATARS = [
 
 const SetupPage = () => {
     const navigate = useNavigate();
+    const { checkAuthStatus } = useAuth();
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0].id);
@@ -74,7 +76,10 @@ const SetupPage = () => {
             // 2. Update Nutrition
             await api.put('/users/nutrition', { nutritionProfile: nutrition });
 
-            // 3. Success -> Dashboard
+            // 3. Refresh user state in AuthContext so layout sees updated avatar/nutrition
+            await checkAuthStatus();
+
+            // 4. Success -> Dashboard
             navigate('/dashboard');
         } catch (error) {
             console.error('Setup failed:', error);
