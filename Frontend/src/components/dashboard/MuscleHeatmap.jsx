@@ -147,7 +147,7 @@ const Tooltip = ({ data, position }) => {
 
 /* ─── BODY SVG ──────────────────────────────────────────────── */
 
-const BodySVG = ({ muscles, volume, details, onHover, onLeave }) => (
+const BodySVG = ({ muscles, volume, onHover, onLeave }) => (
     <svg viewBox="25 10 150 275" className="w-full h-full max-h-100">
         <BodyOutline />
         {Object.entries(muscles).map(([muscle, pathEl]) => (
@@ -221,7 +221,6 @@ const MuscleHeatmap = () => {
     }, [fetchMuscleVolume]);
 
     const handleHover = (muscle, e) => {
-        const rect = e.currentTarget.closest('svg').getBoundingClientRect();
         const containerRect = e.currentTarget.closest('.muscle-heatmap-container').getBoundingClientRect();
         const svgX = e.clientX - containerRect.left;
         const svgY = e.clientY - containerRect.top;
@@ -334,7 +333,6 @@ const MuscleHeatmap = () => {
                         <BodySVG
                             muscles={FRONT_MUSCLES}
                             volume={volume}
-                            details={details}
                             onHover={handleHover}
                             onLeave={handleLeave}
                         />
@@ -348,7 +346,6 @@ const MuscleHeatmap = () => {
                         <BodySVG
                             muscles={BACK_MUSCLES}
                             volume={volume}
-                            details={details}
                             onHover={handleHover}
                             onLeave={handleLeave}
                         />
