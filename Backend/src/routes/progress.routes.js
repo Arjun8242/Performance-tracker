@@ -17,5 +17,6 @@ router.get('/month', protect, validate(progressValidation.getMonth), progressCon
 router.get('/insights', protect, progressController.getInsights);
 router.get('/exercises', protect, progressController.getPerformedExercises);
 router.get('/exercise/:exerciseId', protect, validate(progressValidation.getExerciseAnalytics), progressController.getExerciseAnalytics);
+router.get('/muscle-volume', protect, progressController.getMuscleVolume);
 
 export default router;
