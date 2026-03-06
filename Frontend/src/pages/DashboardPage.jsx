@@ -8,6 +8,7 @@ import WorkoutCalendar from '../components/dashboard/WorkoutCalendar';
 import AIPerformanceCard from '../components/dashboard/AIPerformanceCard';
 import AIOptimizationPanel from '../components/dashboard/AIOptimizationPanel';
 import AdjustmentPreview from '../components/dashboard/AdjustmentPreview';
+import MuscleHeatmap from '../components/dashboard/MuscleHeatmap';
 
 
 
@@ -165,6 +166,11 @@ const DashboardPage = () => {
                         isLoading={isLoadingHeatmap}
                         currentStreak={streak?.currentStreak || 0}
                     />
+
+                    {/* Weekly Muscle Training Heatmap */}
+                    <div className="mt-8">
+                        <MuscleHeatmap />
+                    </div>
                 </div>
 
                 {/* Small Outlines of Progress (1/3) */}

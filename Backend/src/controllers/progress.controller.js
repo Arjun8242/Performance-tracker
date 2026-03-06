@@ -101,11 +101,26 @@ const getPerformedExercises = async (req, res, next) => {
     }
 };
 
+/**
+ * Get weekly muscle volume heatmap data
+ * GET /progress/muscle-volume
+ */
+const getMuscleVolume = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const data = await progressService.getMuscleVolume(userId);
+        res.status(httpStatus.OK).json(data);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export {
     getStreak,
     getSummary,
     getMonth,
     getInsights,
     getExerciseAnalytics,
-    getPerformedExercises
+    getPerformedExercises,
+    getMuscleVolume
 };
