@@ -444,11 +444,81 @@ const getPerformedExercises = async (userId) => {
     return results;
 };
 
+/**
+ * Weekly Muscle Volume
+ * Aggregates total sets per muscle group for the current week.
+ * Returns: { chest: N, back: N, legs: N, shoulders: N, biceps: N, triceps: N, core: N }
+ * Also returns per-muscle exercise count and last trained day name.
+ */
+const getMuscleVolume = async (userId) => {
+    const { start, end } = getCurrentWeekRange();
+
+    const pipeline = [
+        {
+            $match: {
+                userId: new mongoose.Types.ObjectId(userId),
+                date: { $gte: start, $lte: end },
+                status: 'completed'
+            }
+        },
+        { $unwind: '$performedExercises' },
+        {
+            $lookup: {
+                from: 'exercises',
+                localField: 'performedExercises.exerciseId',
+                foreignField: '_id',
+                as: 'exercise'
+            }
+        },
+        { $unwind: '$exercise' },
+        {
+            $project: {
+                muscleGroup: '$exercise.muscleGroup',
+                setsCount: { $size: '$performedExercises.sets' },
+                date: 1
+            }
+        },
+        {
+            $group: {
+                _id: '$muscleGroup',
+                totalSets: { $sum: '$setsCount' },
+                totalExercises: { $sum: 1 },
+                lastTrainedDate: { $max: '$date' }
+            }
+        }
+    ];
+
+    const results = await WorkoutLog.aggregate(pipeline);
+
+    const muscleGroups = ['chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps', 'core'];
+    const volume = {};
+    const details = {};
+
+    for (const mg of muscleGroups) {
+        volume[mg] = 0;
+        details[mg] = { totalSets: 0, totalExercises: 0, lastTrained: null };
+    }
+
+    for (const r of results) {
+        if (muscleGroups.includes(r._id)) {
+            volume[r._id] = r.totalSets;
+            details[r._id] = {
+                totalSets: r.totalSets,
+                totalExercises: r.totalExercises,
+                lastTrained: getDayName(r.lastTrainedDate)
+            };
+        }
+    }
+
+    return { volume, details };
+};
+
 export {
     calculateStreak,
     getWeeklySummary,
     getMonthHeatmap,
     getInsights,
     getPerformedExercises,
-    getExerciseAnalytics
+    getExerciseAnalytics,
+    getMuscleVolume
 };
