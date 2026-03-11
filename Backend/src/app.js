@@ -11,6 +11,7 @@ import adminRoutes from './routes/admin.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import userRoutes from './routes/user.routes.js';
+import testimonialRoutes from './routes/testimonial.routes.js';
 import { successHandler, errorHandler } from './middleware/logger.middleware.js';
 import { errorConverter, globalErrorHandler, notFound } from './middleware/error.middleware.js';
 import { generalLimiter } from './middleware/rateLimiter.middleware.js';
@@ -104,6 +105,7 @@ app.use('/admin', adminRoutes);
 app.use('/exercises', exerciseRoutes);
 app.use('/ai', aiRoutes);
 app.use('/users', userRoutes);
+app.use('/testimonials', testimonialRoutes);
 
 // send 404 error to undefined api routes
 app.use(notFound);

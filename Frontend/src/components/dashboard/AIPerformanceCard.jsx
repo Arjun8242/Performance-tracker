@@ -129,7 +129,7 @@ const AIPerformanceCard = () => {
     const isButtonDisabled = isCached || isAnalyzing || isRateLimited;
 
     return (
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] overflow-hidden flex flex-col h-full shadow-sm hover:shadow-md transition-all">
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all">
             {/* Header */}
             <div className="p-8 pb-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">

@@ -77,6 +77,7 @@ const WorkoutLibraryPage = () => {
             });
 
             const response = await api.get('/exercises', { params });
+            console.log("Exercises from API:", response.data.exercises);
             setExercises(response.data.exercises);
             setPagination(prev => ({
                 ...prev,

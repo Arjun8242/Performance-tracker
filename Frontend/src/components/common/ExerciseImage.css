@@ -1,0 +1,173 @@
+/* ExerciseImage Component Styles */
+
+/* Container styles */
+.exercise-image-container {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+/* Card variant - Workout Library */
+.exercise-image-container--card {
+  height: 120px;
+  aspect-ratio: 16 / 9;
+  min-height: 120px;
+  max-height: 160px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .exercise-image-container--card {
+    height: 140px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .exercise-image-container--card {
+    height: 160px;
+  }
+}
+
+/* Analytics variant - Analytics page */
+.exercise-image-container--analytics {
+  height: 240px;
+  aspect-ratio: 16 / 9;
+  min-height: 200px;
+  max-height: 260px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* Thumbnail variant - Compact lists */
+.exercise-image-container--thumbnail {
+  height: 40px;
+  width: 60px;
+  min-width: 60px;
+  min-height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .exercise-image-container--thumbnail {
+    height: 50px;
+    width: 75px;
+    min-width: 75px;
+    min-height: 50px;
+  }
+}
+
+/* Image styles */
+.exercise-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.exercise-image--card {
+  width: 100%;
+  height: 100%;
+}
+
+.exercise-image--analytics {
+  width: 100%;
+  height: 100%;
+}
+
+.exercise-image--thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Loading state */
+.exercise-image--loading {
+  opacity: 0;
+}
+
+/* Skeleton loader */
+.exercise-image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 25%,
+    #e5e7eb 50%,
+    #f3f4f6 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 12px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .exercise-image-container {
+    border-radius: 8px;
+  }
+
+  .exercise-image-container--card {
+    height: 100px;
+    max-height: 140px;
+  }
+
+  .exercise-image-skeleton {
+    border-radius: 8px;
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .exercise-image {
+    transition: none;
+  }
+
+  .exercise-image-skeleton {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .exercise-image-container {
+    background-color: #1f2937;
+  }
+
+  .exercise-image-skeleton {
+    background: linear-gradient(
+      90deg,
+      #1f2937 25%,
+      #374151 50%,
+      #1f2937 75%
+    );
+  }
+}

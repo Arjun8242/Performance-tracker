@@ -16,6 +16,7 @@ import AuthenticatedAppLayout from './components/layout/AuthenticatedAppLayout';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import ProtectedRoute from './routes/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage';
+import ReviewsPage from './pages/ReviewsPage';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="/exercise/:exerciseId" element={<ExerciseAnalyticsPage />} />
             <Route path="/exercises" element={<ExercisesPage />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
 

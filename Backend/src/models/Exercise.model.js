@@ -67,7 +67,13 @@ const exerciseSchema = new mongoose.Schema(
       index: true,
     },
 
-    // Optional: future-proofing
+    // Exercise image from ExerciseDB API
+    image: {
+      type: String,
+      default: null,
+    },
+
+    // Legacy field, kept for backward compatibility
     imageUrl: {
       type: String,
       default: null,

@@ -27,6 +27,7 @@ import {
     Hash
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ExerciseImage from '../components/common/ExerciseImage';
 
 
 
@@ -146,7 +147,7 @@ const ExerciseAnalyticsPage = () => {
         <div className="pb-24 space-y-12">
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-                <div>
+                <div className="flex-1">
                     <button
                         onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-neutral-400 hover:text-black dark:hover:text-white font-black text-[10px] uppercase tracking-widest mb-6 transition-colors group"
@@ -154,6 +155,18 @@ const ExerciseAnalyticsPage = () => {
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         Back to Library
                     </button>
+
+                    {/* Exercise Image */}
+                    {exercise.image && (
+                        <div className="mb-6 w-full">
+                            <ExerciseImage
+                                src={exercise.image}
+                                alt={exercise.name}
+                                variant="analytics"
+                            />
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-3 mb-3">
                         <span className="px-4 py-1.5 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
                             {exercise.muscleGroup}

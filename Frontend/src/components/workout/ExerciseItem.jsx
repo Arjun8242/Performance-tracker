@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Dumbbell, X } from 'lucide-react';
+import ExerciseImage from '../common/ExerciseImage';
 
 const ExerciseItem = ({
     exercise,
@@ -18,9 +19,20 @@ const ExerciseItem = ({
             animate={{ opacity: 1, x: 0 }}
             className={`flex flex-wrap items-center gap-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-2xl border transition-all duration-300 group ${readOnly ? 'border-neutral-100 dark:border-neutral-700' : 'border-neutral-100 dark:border-neutral-700 hover:border-orange-200 hover:bg-white dark:hover:bg-neutral-900 hover:shadow-md'}`}
         >
-            <div className="w-10 h-10 bg-white dark:bg-neutral-900 rounded-xl flex items-center justify-center border border-neutral-100 dark:border-neutral-700 shadow-sm group-hover:scale-110 transition-transform">
-                <Dumbbell className="w-5 h-5 text-orange-500" />
-            </div>
+            {/* Exercise Image or Icon */}
+            {exercise.exerciseId?.image ? (
+                <div className="w-16 h-12 flex-shrink-0 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-600 shadow-sm">
+                    <ExerciseImage
+                        src={exercise.exerciseId.image}
+                        alt={displayName}
+                        variant="thumbnail"
+                    />
+                </div>
+            ) : (
+                <div className="w-10 h-10 bg-white dark:bg-neutral-900 rounded-xl flex items-center justify-center border border-neutral-100 dark:border-neutral-700 shadow-sm group-hover:scale-110 transition-transform flex-shrink-0">
+                    <Dumbbell className="w-5 h-5 text-orange-500" />
+                </div>
+            )}
             <div className="flex-1 min-w-37.5">
                 <h4 className="font-bold text-black dark:text-white capitalize transition-colors group-hover:text-orange-600">{displayName}</h4>
             </div>

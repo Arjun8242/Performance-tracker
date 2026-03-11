@@ -50,7 +50,7 @@ const createWorkoutPlan = async (userId, planDetails) => {
 const fetchActiveWorkoutPlan = async (userId) => {
   const plan = await WorkoutPlan.findOne({ userId }).populate({
     path: 'workouts.exercises.exerciseId',
-    select: 'name muscle equipment difficulty'
+    select: 'name muscleGroup equipment difficulty image'
   });
 
   if (!plan) {

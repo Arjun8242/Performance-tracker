@@ -15,7 +15,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Menu,
-    Zap
+    Zap,
+    Star
 } from 'lucide-react';
 
 import male1 from '../../assets/male1.png';
@@ -75,6 +76,7 @@ const AuthenticatedAppLayout = () => {
 
         { name: 'Workout Logs', path: '/workout-logging', icon: ClipboardList, isImplemented: true },
         { name: 'Progress', path: '/progress', icon: TrendingUp, isImplemented: true },
+        { name: 'Reviews', path: '/reviews', icon: Star, isImplemented: true },
         { name: 'Profile', path: '/profile', icon: User, isImplemented: true },
         { name: 'Chat', path: '/chat', icon: MessageSquare, isImplemented: true },
     ];

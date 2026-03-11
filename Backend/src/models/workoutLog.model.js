@@ -19,6 +19,14 @@ const performedExerciseSchema = new mongoose.Schema({
     ref: 'Exercise',
     required: true,
   },
+  name: {
+    type: String,
+    default: 'Exercise', // Fallback if exercise is deleted
+  },
+  muscleGroup: {
+    type: String,
+    default: null,
+  },
   sets: {
     type: [setSchema],
     required: true,

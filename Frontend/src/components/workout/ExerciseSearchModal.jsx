@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Dumbbell, Loader2, Info, Plus } from 'lucide-react';
+import ExerciseImage from '../common/ExerciseImage';
 
 
 
@@ -93,21 +94,31 @@ const ExerciseSearchModal = ({ isOpen, onClose, onSelectExercise }) => {
                                             <button
                                                 key={ex.id || ex._id}
                                                 onClick={() => onSelectExercise(ex)}
-                                                className="w-full flex items-center justify-between p-5 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-700 rounded-2xl hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-500/10 transition-all group active:scale-[0.98]"
+                                                className="w-full flex items-center justify-between p-4 bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-700 rounded-2xl hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-500/10 transition-all group active:scale-[0.98] overflow-hidden"
                                             >
-                                                <div className="flex items-center gap-5">
-                                                    <div className="w-12 h-12 bg-neutral-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center group-hover:bg-white dark:group-hover:bg-neutral-900 transition-colors">
-                                                        <Dumbbell className="w-6 h-6 text-orange-500" />
-                                                    </div>
-                                                    <div className="text-left">
-                                                        <h4 className="font-black text-black dark:text-white uppercase text-sm tracking-tight">{ex.name}</h4>
-                                                        <div className="flex gap-2 mt-1">
+                                                <div className="flex items-center gap-4 min-w-0 flex-1">
+                                                    {ex.image ? (
+                                                        <div className="w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden border border-neutral-100 dark:border-neutral-700">
+                                                            <ExerciseImage
+                                                                src={ex.image}
+                                                                alt={ex.name}
+                                                                variant="thumbnail"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-16 h-16 flex-shrink-0 bg-neutral-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center group-hover:bg-white dark:group-hover:bg-neutral-900 transition-colors border border-neutral-100 dark:border-neutral-700">
+                                                            <Dumbbell className="w-6 h-6 text-orange-500" />
+                                                        </div>
+                                                    )}
+                                                    <div className="text-left min-w-0 flex-1">
+                                                        <h4 className="font-black text-black dark:text-white uppercase text-sm tracking-tight line-clamp-1">{ex.name}</h4>
+                                                        <div className="flex gap-2 mt-1 flex-wrap">
                                                             <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-tighter bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">{ex.muscleGroup}</span>
                                                             <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-tighter bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full">{ex.difficulty}</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <Plus className="w-6 h-6 text-neutral-300 group-hover:text-orange-500" />
+                                                <Plus className="w-6 h-6 text-neutral-300 group-hover:text-orange-500 flex-shrink-0 ml-4" />
                                             </button>
                                         ))}
                                     </div>

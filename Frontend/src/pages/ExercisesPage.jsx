@@ -16,6 +16,7 @@ import {
     List
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ExerciseImage from '../components/common/ExerciseImage';
 
 
 
@@ -128,14 +129,26 @@ const ExercisesPage = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
                                 onClick={() => navigate(`/exercise/${ex.exerciseId}`)}
-                                className="group bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-[2.5rem] p-8 hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/10 cursor-pointer transition-all duration-500 relative overflow-hidden"
+                                className="group bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-[2.5rem] overflow-hidden hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/10 cursor-pointer transition-all duration-500 relative flex flex-col"
                             >
-                                <div className="relative z-10">
+                                {/* Exercise Image */}
+                                {ex.image ? (
+                                    <div className="h-48 overflow-hidden bg-neutral-100 dark:bg-neutral-800 group-hover:scale-105 transition-transform duration-500">
+                                        <ExerciseImage
+                                            src={ex.image}
+                                            alt={ex.name}
+                                            variant="card"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="h-48 bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center">
+                                        <Dumbbell className="w-12 h-12 text-neutral-300 group-hover:text-orange-500 transition-colors" />
+                                    </div>
+                                )}
+
+                                <div className="p-8 flex-1 flex flex-col relative z-10">
                                     <div className="flex items-start justify-between mb-6">
-                                        <div className="w-14 h-14 bg-neutral-50 rounded-2xl flex items-center justify-center group-hover:bg-orange-500 group-hover:scale-110 transition-all duration-500 scale-100">
-                                            <Dumbbell className="w-7 h-7 text-neutral-300 group-hover:text-white transition-colors" />
-                                        </div>
-                                        <div className="text-right">
+                                        <div className="flex-1">
                                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 bg-orange-500/5 px-2 py-0.5 rounded-md border border-orange-500/10">
                                                 {ex.muscleGroup}
                                             </span>
@@ -149,7 +162,7 @@ const ExercisesPage = () => {
                                         {ex.name}
                                     </h3>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-4 flex-1">
                                         <div className="bg-neutral-50 rounded-2xl p-4 group-hover:bg-white border border-transparent group-hover:border-neutral-100 transition-all">
                                             <p className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-1">Max E1RM</p>
                                             <p className="text-xl font-black text-black dark:text-white">{ex.bestE1RM}<span className="text-[10px] ml-1">kg</span></p>

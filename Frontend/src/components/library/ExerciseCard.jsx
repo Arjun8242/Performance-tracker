@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Dumbbell, CheckCircle2, Plus, Filter, TrendingUp, BarChart2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ExerciseImage from '../common/ExerciseImage';
 
 const ExerciseCard = ({ exercise, isSelected, onSelect }) => {
     const navigate = useNavigate();
@@ -13,22 +14,33 @@ const ExerciseCard = ({ exercise, isSelected, onSelect }) => {
             className={`group relative bg-white dark:bg-neutral-900 rounded-4xl border-2 transition-all duration-300 overflow-hidden ${isSelected ? 'border-orange-500 shadow-xl shadow-orange-500/10' : 'border-neutral-100 dark:border-neutral-800 hover:border-orange-500/30 shadow-sm'
                 }`}
         >
-            {/* Visual Header */}
-            <div className={`h-32 p-6 flex items-start justify-between transition-colors ${isSelected ? 'bg-orange-50 dark:bg-orange-500/10' : 'bg-neutral-50 dark:bg-neutral-800 group-hover:bg-orange-50/30 dark:group-hover:bg-orange-500/10'
-                }`}>
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 transition-all ${isSelected ? 'bg-orange-500 border-orange-500 scale-110' : 'bg-white border-neutral-100 group-hover:border-orange-500/20'
-                    }`}>
-                    <Dumbbell className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-neutral-400 group-hover:text-orange-500'}`} />
+            {/* Image Header */}
+            <div className="relative h-32 overflow-hidden">
+                {exercise.image ? (
+                    <ExerciseImage
+                        src={exercise.image}
+                        alt={exercise.name}
+                        variant="card"
+                    />
+                ) : (
+                    <div className={`h-full flex items-center justify-center transition-colors ${isSelected ? 'bg-orange-50 dark:bg-orange-500/10' : 'bg-neutral-50 dark:bg-neutral-800 group-hover:bg-orange-50/30 dark:group-hover:bg-orange-500/10'
+                        }`}>
+                        <Dumbbell className="w-8 h-8 text-neutral-400 group-hover:text-orange-500" />
+                    </div>
+                )}
+                
+                {/* Overlay with Selection Button */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-start justify-end p-3">
+                    <button
+                        onClick={onSelect}
+                        className={`p-2 rounded-xl transition-all backdrop-blur-sm ${isSelected
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-white/90 text-neutral-300 border border-neutral-100 hover:text-orange-500 hover:border-orange-500/50'
+                            }`}
+                    >
+                        {isSelected ? <CheckCircle2 className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+                    </button>
                 </div>
-                <button
-                    onClick={onSelect}
-                    className={`p-2 rounded-xl transition-all ${isSelected
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-white text-neutral-300 border border-neutral-100 hover:text-orange-500 hover:border-orange-500/50'
-                        }`}
-                >
-                    {isSelected ? <CheckCircle2 className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
-                </button>
             </div>
 
             {/* Content */}
